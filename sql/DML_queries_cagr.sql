@@ -74,6 +74,8 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
  select * from mysql_portfolio.eps_info order by symbol;
 
 ------------------------------ CAGR DATA -------------------------------
+
+-- --------------------------------- ebitda CAGR ----------------------------------------
  drop table mysql_portfolio.ebitda_info;
  create table mysql_portfolio.ebitda_info as
  WITH ebitda_growth as
@@ -109,6 +111,7 @@ SELECT *,
  ;
  select * from mysql_portfolio.ebitda_info;
 
+-- --------------------------------- netincome CAGR ----------------------------------------
  drop table mysql_portfolio.netincome_info;
  create table mysql_portfolio.netincome_info as
  WITH netincome_growth as
@@ -142,6 +145,7 @@ row_number() over (partition by symbol order by calendarYear) as row_numb, curda
  ;
  SELECT * FROM mysql_portfolio.netincome_info;
 
+-- --------------------------------- sales/revenue CAGR ----------------------------------------
  drop table mysql_portfolio.sales_info;
  create table mysql_portfolio.sales_info as
  WITH sales_growth as
@@ -176,6 +180,7 @@ curdate() as created_at
  ;
  select * from mysql_portfolio.sales_info;
 
+-- --------------------------------- free cash flow CAGR ----------------------------------------
  drop table mysql_portfolio.free_cash_flow_info;
  create table mysql_portfolio.free_cash_flow_info as
  WITH free_cashflow_growth as
