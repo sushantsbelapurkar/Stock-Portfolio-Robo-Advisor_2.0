@@ -1,6 +1,6 @@
    DROP TABLE mysql_portfolio.value_analysis;
-   -- CREATE TABLE mysql_portfolio.value_analysis;
-   SELECT symbol,latest_price_date, latest_close_price,_50_day_avg_price,_200_day_avg_price,_5yr_avg_price,final_pe_ratio,live_peratio,
+   CREATE TABLE mysql_portfolio.value_analysis AS
+   SELECT symbol,latest_price_date, latest_close_price,_50day_avg_price,_200day_avg_price,_5yr_avg_price,final_pe_ratio,live_peratio,
    pbratio,live_pbratio,ratio_pe_into_pb,price_fcf_ratio,price_ocf_ratio,
    CASE
    WHEN final_pe_ratio <=15 THEN 'undervalued'
@@ -18,8 +18,13 @@
    CASE
    WHEN ratio_pe_into_pb <=22.5 THEN 'undervalued'
    WHEN (ratio_pe_into_pb > 22.5 AND ratio_pe_into_pb <=40) THEN 'conisderable'
-   WHEN ratio_pe_into_pb > 40 THEN 'undervalued'
-   WHEN ratio_pe_into_pb IS NULL THEN 'data_na' END AS pepb_ratio_analysis
+   WHEN ratio_pe_into_pb > 40 THEN 'overvalued'
+   WHEN ratio_pe_into_pb IS NULL THEN 'data_na' END AS pepb_ratio_analysis,
+   CASE
+   WHEN price_ocf_ratio <=10 THEN 'undervalued'
+   WHEN (price_ocf_ratio > 10 AND price_ocf_ratio <=15) THEN 'conisderable'
+   WHEN price_ocf_ratio > 15 THEN 'overvalued'
+   WHEN price_ocf_ratio IS NULL THEN 'data_na' END AS price_ocf_analysis
    FROM mysql_portfolio.vw_stock_parameter_check;
 
    SELECT * FROM mysql_portfolio.value_analysis;

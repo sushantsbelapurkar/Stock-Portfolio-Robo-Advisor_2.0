@@ -1,5 +1,6 @@
 DROP TABLE mysql_portfolio.growth_analysis;
-  CREATE TABLE mysql_portfolio.growth_analysis AS
+  -- CREATE TABLE mysql_portfolio.growth_analysis AS
+
    SELECT stock_param.symbol,stock_param.latest_price_date, stock_param.recent_ebitda_growth,stock_param._5yr_ebitda_cagr,
    stock_param.recent_netincome_growth,stock_param._5yr_netincome_cagr,stock_param.recent_revenue_growth,stock_param._5yr_revenue_cagr,
    key_m.roe,fin_growth.fiveYShareholdersEquityGrowthPerShare,fin_growth.fiveYOperatingCFGrowthPerShare,fin_growth.fiveYDividendperShareGrowthPerShare,
@@ -49,9 +50,9 @@ DROP TABLE mysql_portfolio.growth_analysis;
    END AS _5y_operating_cash_flow_growth,
    CASE
    WHEN fin_growth.fiveYDividendperShareGrowthPerShare > 0 THEN 'positive'
-   WHEN fin_growth.fiveYShareholdersEquityGrowthPerShare <= 0 THEN 'negative'
-   WHEN fin_growth.fiveYShareholdersEquityGrowthPerShare = 0 THEN 'no_change'
-   WHEN fin_growth.fiveYShareholdersEquityGrowthPerShare is null THEN 'data_na'
+   WHEN fin_growth.fiveYDividendperShareGrowthPerShare <= 0 THEN 'negative'
+   WHEN fin_growth.fiveYDividendperShareGrowthPerShare = 0 THEN 'no_change'
+   WHEN fin_growth.fiveYDividendperShareGrowthPerShare is null THEN 'data_na'
    END AS _5y_divident_growth,
    CASE
    WHEN fin_growth.rdexpenseGrowth > 0 THEN 'positive'
@@ -74,10 +75,11 @@ DROP TABLE mysql_portfolio.growth_analysis;
    FROM mysql_portfolio.vw_stock_parameter_check stock_param
    LEFT JOIN mysql_portfolio.financial_growth fin_growth
    ON fin_growth.symbol = stock_param.symbol
-   AND YEAR(fin_growth.date) = (SELECT MAX(YEAR(date)) FROM mysql_portfolio.financial_growth)
+   AND YEAR(fin_growth.date) = stock_param.calendarYear
    LEFT JOIN mysql_portfolio.key_metrics key_m
    ON key_m.symbol = stock_param.symbol
-   AND YEAR(key_m.date) = (SELECT MAX(YEAR(date)) FROM mysql_portfolio.key_metrics);
+   AND YEAR(key_m.date) = stock_param.calendarYear
+   ;
 
    SELECT * FROM mysql_portfolio.growth_analysis;
 
