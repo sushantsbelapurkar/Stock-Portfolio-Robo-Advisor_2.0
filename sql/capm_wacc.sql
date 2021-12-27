@@ -41,41 +41,33 @@ CREATE TABLE mysql_portfolio.avg_std_dev AS
  SELECT * FROM mysql_portfolio.avg_std_dev;
 
 
- drop table mysql_portfolio.expected_rate_of_return;
- TRUNCATE mysql_portfolio.expected_rate_of_return;
- CREATE table mysql_portfolio.expected_rate_of_return
-(
-  -- id int not null auto_increment,
-  symbol varchar(250) null,
-  year int,
-  possible_return_true float(5,2),
-  probability_true decimal(4,2),
-  possible_return_positive float(5,2),
-  probability_positive decimal(4,2),
-  possible_return_negative float(5,2),
-  probability_negative decimal(4,2),
-  expected_rate_of_return float(5,2)
-  -- float(n,n) specifies approximate whereas decimal(n,n) specifies exact decimal places
-);
-
- INSERT INTO mysql_portfolio.expected_rate_of_return
+ drop table mysql_portfolio.expected_return;
+ TRUNCATE mysql_portfolio.expected_return;
+ CREATE table mysql_portfolio.expected_return AS
+ WITH expected_parameters AS
  (
- symbol,year,possible_return_true,probability_true,
- possible_return_positive,probability_positive,
- possible_return_negative,probability_negative,expected_rate_of_return
- )
- SELECT symbol,year(latest_price_date),
- round(avg_return,2) , 0.5,
- round(avg_return+avg_return*0.05,2),0.2,
- round(avg_return-avg_return*0.15,2),0.3,
- round((0.5*round(avg_return,2))
- +(0.2*round(avg_return+avg_return*0.05,2))+(0.3*round(avg_return-avg_return*0.15,2)),2)
-
+ SELECT symbol,latest_price_date,
+ round(avg_return,2) as true_avg_return,volatility as std_dev,
+ CASE
+ WHEN volatility <= 25.00 THEN 0.6
+ WHEN (volatility > 25.00 AND volatility<=50) THEN 0.4
+ WHEN volatility > 50 THEN 0.2 END AS probability_true,
+ CASE
+ WHEN volatility <= 25.00 THEN 0.2
+ WHEN (volatility > 25.00 AND volatility<=50) THEN 0.3
+ WHEN volatility > 50 THEN 0.4 END AS probability_positive,
+ CASE
+ WHEN volatility <= 25.00 THEN 0.2
+ WHEN (volatility > 25.00 AND volatility<=50) THEN 0.3
+ WHEN volatility > 50 THEN 0.4 END AS probability_negative
  FROM mysql_portfolio.avg_std_dev
---  WHERE year = (SELECT MAX(year(latest_price_date)) FROM mysql_portfolio.avg_std_dev)
+ )
+ SELECT *,
+ round((probability_true*round(true_avg_return,2))+(probability_positive*round(true_avg_return+true_avg_return*0.10,2))
+ +(probability_negative*round(true_avg_return+true_avg_return*-0.15,2)),2) AS expected_rate_of_return FROM expected_parameters
  ;
 
- SELECT * FROM mysql_portfolio.expected_rate_of_return;
+ SELECT * FROM mysql_portfolio.expected_return;
 
  -- TAKE 10YRS RISK FREE RATE
  drop table mysql_portfolio.risk_free_rate;
@@ -114,7 +106,7 @@ SET GLOBAL local_infile = true;
  (
  SELECT symbol,expected_rate_of_return,
  (SELECT t_bill_rate FROM mysql_portfolio.risk_free_rate WHERE latest_date = (SELECT MAX(latest_date) FROM mysql_portfolio.risk_free_rate))
- as risk_free_rate FROM mysql_portfolio.expected_rate_of_return
+ as risk_free_rate FROM mysql_portfolio.expected_return
  )
  SELECT DISTINCT rate.symbol,rate.expected_rate_of_return,rate.risk_free_rate,
  (rate.expected_rate_of_return-rate.risk_free_rate) as equity_risk_premium,stock_screener.beta,
