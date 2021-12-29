@@ -93,8 +93,8 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
  create table mysql_portfolio.ebitda_info as
  WITH ebitda_growth as
  (
- SELECT symbol,calendarYear,
- CASE WHEN ebitda > 0 THEN ebitda ELSE 0.1 END AS ebitda,
+ SELECT symbol,calendarYear, ebitda,
+ -- CASE WHEN ebitda > 0 THEN ebitda ELSE 0.1 END AS ebitda,
  lag(ebitda) over (partition by symbol order by calendarYear) as prev_ebitda,
 CASE WHEN ebitda > lag(ebitda) over (partition by symbol order by calendarYear) THEN 'Y' ELSE 'N' END AS ebitda_growth,
 round(avg(ebitda) over(partition by symbol order by calendarYear rows between unbounded preceding and unbounded following),2) as avg_ebitda,
@@ -104,59 +104,178 @@ curdate() as created_at
  WHERE calendarYear >= YEAR(DATE_SUB(CURDATE(), INTERVAL 4 YEAR)) -- in redshift we use dateadd() function to do the same; mysql also have date_add() for future dates
 order by 1,2 desc
 ),
-ebitda_details as
-(
-SELECT *,
-  ((power((LAST_VALUE(ebitda) over(partition by symbol order by calendarYear))
-  /(FIRST_VALUE(ebitda) over(partition by symbol order by calendarYear)),(1/5)))-1)*100  as carg FROM ebitda_growth
+composite_key AS
+ (
+	SELECT *,CONCAT(ebitda_growth.symbol,ebitda_growth.row_numb) as comp_key FROM ebitda_growth
+
+),
+ row_selection AS
+ (
+   SELECT CONCAT(symbol,row_num) as comp_key FROM
+   (
+   SELECT symbol,MAX(row_numb) as row_num FROM ebitda_growth GROUP BY 1
+   UNION ALL
+   SELECT symbol,MIN(row_numb) as row_num FROM ebitda_growth GROUP BY 1
+   )a
+ ),
+ required_data AS
+ (
+  SELECT composite_key.*
+  FROM row_selection
+  LEFT JOIN composite_key
+  ON row_selection.comp_key = composite_key.comp_key
   ),
-  max_row as
+ number_of_years AS
+ (
+  SELECT symbol, COUNT(calendarYear) AS yrs_num FROM ebitda_growth GROUP BY 1
+  ),
+ ebitda_details as
+ (
+ SELECT ebitdag.*,
+ CASE
+ WHEN
+ FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) > 0
+ AND LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) > 0
+ THEN
+ ((power((LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear))
+ /(FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear)),(1/yrs.yrs_num)))-1)*100
+ WHEN
+ FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) < 0
+ AND LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) < 0
+ THEN
+ ((power((ABS(LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear)))
+ /(ABS(FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear))),(1/yrs.yrs_num)))-1)*100 *-1
+ WHEN
+ FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) < 0
+ AND LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) > 0
+THEN
+(POW(((LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear)
++ 2* ABS(FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear)))
+/ABS(FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear))),(1/yrs.yrs_num))-1)*100
+WHEN
+FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) > 0
+ AND LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear) < 0
+THEN
+(POW(((ABS(LAST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear))
++ 2*FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear))
+/ FIRST_VALUE(ebitdag.ebitda) over(partition by ebitdag.symbol order by ebitdag.calendarYear)),(1/yrs.yrs_num))-1)*100*-1
+
+ END as carg
+ FROM required_data ebitdag
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = ebitdag.symbol
+ ),
+ max_row as
  (
   SELECT symbol, max(row_numb) as max_row_numb FROM ebitda_details GROUP BY 1
  )
  SELECT ebitda_details.symbol, ebitda_details.calendarYear, ebitda_details.ebitda as recent_ebitda,
- ebitda_details.ebitda_growth as recent_ebitda_growth, ebitda_details.avg_ebitda as _5yr_avg_ebitda,round(ebitda_details.carg,2)
- as _5yr_ebitda_cagr
+ ebitda_details.ebitda_growth as recent_ebitda_growth, ebitda_details.avg_ebitda, yrs.yrs_num as number_of_yrs,
+ round(ebitda_details.carg,2) as ebitda_cagr
  FROM ebitda_details
  LEFT JOIN
  max_row ON ebitda_details.symbol = max_row.symbol
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = ebitda_details.symbol
  WHERE ebitda_details.row_numb = max_row.max_row_numb order by 1,2
  ;
+
  select * from mysql_portfolio.ebitda_info;
+
 
  -- --------------------------------- netincome CAGR ----------------------------------------
  drop table mysql_portfolio.netincome_info;
  create table mysql_portfolio.netincome_info as
  WITH netincome_growth as
  (
- SELECT symbol,calendarYear,
-CASE WHEN netincome > 0 THEN netincome ELSE 0.1 END AS netincome,
+ SELECT symbol,calendarYear, netincome,
  lag(netincome) over (partition by symbol order by calendarYear) as prev_netincome,
 CASE WHEN netincome > lag(netincome) over (partition by symbol order by calendarYear) THEN 'Y' ELSE 'N' END AS netincome_growth,
-round(avg(netincome) over(partition by symbol order by calendarYear rows between unbounded preceding and unbounded following),2) as avg_netincome,
-row_number() over (partition by symbol order by calendarYear) as row_numb, curdate() as created_at
-  FROM mysql_portfolio.income_statement
+round(avg(freeCashFlow) over(partition by symbol order by calendarYear rows between unbounded preceding and unbounded following),2) as avg_netincome,
+row_number() over (partition by symbol order by calendarYear) as row_numb,
+curdate() as created_at
+  FROM mysql_portfolio.cash_flow_statement
  WHERE calendarYear >= YEAR(DATE_SUB(CURDATE(), INTERVAL 4 YEAR))
+ order by 1,2 desc -- in redshift we use dateadd() function to do the same; mysql also have date_add() for future dates
  ),
+ composite_key AS
+ (
+	SELECT *,CONCAT(netincome_growth.symbol,netincome_growth.row_numb) as comp_key FROM netincome_growth
+
+),
+ row_selection AS
+ (
+   SELECT CONCAT(symbol,row_num) as comp_key FROM
+   (
+   SELECT symbol,MAX(row_numb) as row_num FROM netincome_growth GROUP BY 1
+   UNION ALL
+   SELECT symbol,MIN(row_numb) as row_num FROM netincome_growth GROUP BY 1
+   )a
+ ),
+ required_data AS
+ (
+  SELECT composite_key.*
+  FROM row_selection
+  LEFT JOIN composite_key
+  ON row_selection.comp_key = composite_key.comp_key
+  ),
+ number_of_years AS
+ (
+  SELECT symbol, COUNT(calendarYear) AS yrs_num FROM netincome_growth GROUP BY 1
+  ),
  netincome_details as
  (
- SELECT  *,
- ((power((LAST_VALUE(netincome) over(partition by symbol order by calendarYear))/(FIRST_VALUE(netincome) over(partition by symbol order by calendarYear)),(1/5)))-1)*100 as carg
- FROM netincome_growth
+ SELECT nig.*,
+ CASE
+ WHEN
+ FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) > 0
+ AND LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) > 0
+ THEN
+ ((power((LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear))
+ /(FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear)),(1/yrs.yrs_num)))-1)*100
+ WHEN
+ FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) < 0
+ AND LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) < 0
+ THEN
+ ((power((ABS(LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear)))
+ /(ABS(FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear))),(1/yrs.yrs_num)))-1)*100 *-1
+ WHEN
+ FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) < 0
+ AND LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) > 0
+THEN
+(POW(((LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear)
++ 2* ABS(FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear)))
+/ABS(FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear))),(1/yrs.yrs_num))-1)*100
+WHEN
+FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) > 0
+ AND LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear) < 0
+THEN
+(POW(((ABS(LAST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear))
++ 2*FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear))
+/ FIRST_VALUE(nig.netincome) over(partition by nig.symbol order by nig.calendarYear)),(1/yrs.yrs_num))-1)*100*-1
+
+ END as carg
+ FROM required_data nig
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = nig.symbol
  ),
  max_row as
  (
   SELECT symbol, max(row_numb) as max_row_numb FROM netincome_details GROUP BY 1
  )
  SELECT netincome_details.symbol, netincome_details.calendarYear, netincome_details.netincome as recent_netincome,
- netincome_details.netincome_growth as recent_netincome_growth, netincome_details.avg_netincome as _5yr_avg_netincome,round(netincome_details.carg,2)
- as _5yr_netincome_cagr
+ netincome_details.netincome_growth as recent_netincome_growth, netincome_details.avg_netincome, yrs.yrs_num as number_of_yrs,
+ round(netincome_details.carg,2) as netincome_cagr
  FROM netincome_details
  LEFT JOIN
  max_row ON netincome_details.symbol = max_row.symbol
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = netincome_details.symbol
  WHERE netincome_details.row_numb = max_row.max_row_numb order by 1,2
  ;
- SELECT * FROM mysql_portfolio.netincome_info;
+
+ SELECT * FROM mysql_portfolio.netincome_info
+ ;
 
 
  -- --------------------------------- sales/revenue CAGR ----------------------------------------
@@ -164,8 +283,8 @@ row_number() over (partition by symbol order by calendarYear) as row_numb, curda
  create table mysql_portfolio.sales_info as
  WITH sales_growth as
  (
- SELECT symbol,calendarYear,
- CASE WHEN revenue > 0 THEN revenue ELSE 0.1 END AS revenue,
+ SELECT symbol,calendarYear,revenue,
+ -- CASE WHEN revenue > 0 THEN revenue ELSE 0.1 END AS revenue,
  lag(revenue) over (partition by symbol order by calendarYear) as prev_revenue,
 CASE WHEN revenue > lag(revenue) over (partition by symbol order by calendarYear) THEN 'Y' ELSE 'N' END AS revenue_growth,
 round(avg(revenue) over(partition by symbol order by calendarYear rows between unbounded preceding and unbounded following),2) as avg_revenue,
@@ -174,34 +293,91 @@ curdate() as created_at
   FROM mysql_portfolio.income_statement
  WHERE calendarYear >= YEAR(DATE_SUB(CURDATE(), INTERVAL 4 YEAR))
  ),
+ composite_key AS
+ (
+	SELECT *,CONCAT(sales_growth.symbol,sales_growth.row_numb) as comp_key FROM sales_growth
+
+),
+ row_selection AS
+ (
+   SELECT CONCAT(symbol,row_num) as comp_key FROM
+   (
+   SELECT symbol,MAX(row_numb) as row_num FROM sales_growth GROUP BY 1
+   UNION ALL
+   SELECT symbol,MIN(row_numb) as row_num FROM sales_growth GROUP BY 1
+   )a
+ ),
+ required_data AS
+ (
+  SELECT composite_key.*
+  FROM row_selection
+  LEFT JOIN composite_key
+  ON row_selection.comp_key = composite_key.comp_key
+  ),
+ number_of_years AS
+ (
+  SELECT symbol, COUNT(calendarYear) AS yrs_num FROM sales_growth GROUP BY 1
+  ),
  sales_details as
  (
- SELECT *,
- ((power((LAST_VALUE(revenue) over(partition by symbol order by calendarYear))/(FIRST_VALUE(revenue) over(partition by symbol order by calendarYear)),(1/5)))-1)*100 as carg
- FROM sales_growth
+ SELECT sg.*,
+ CASE
+ WHEN
+ FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) > 0
+ AND LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) > 0
+ THEN
+ ((power((LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear))
+ /(FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear)),(1/yrs.yrs_num)))-1)*100
+ WHEN
+ FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) < 0
+ AND LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) < 0
+ THEN
+ ((power((ABS(LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear)))
+ /(ABS(FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear))),(1/yrs.yrs_num)))-1)*100 *-1
+ WHEN
+ FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) < 0
+ AND LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) > 0
+THEN
+(POW(((LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear)
++ 2* ABS(FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear)))
+/ABS(FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear))),(1/yrs.yrs_num))-1)*100
+WHEN
+FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) > 0
+ AND LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear) < 0
+THEN
+(POW(((ABS(LAST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear))
++ 2*FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear))
+/ FIRST_VALUE(sg.revenue) over(partition by sg.symbol order by sg.calendarYear)),(1/yrs.yrs_num))-1)*100*-1
+
+ END as carg
+ FROM required_data sg
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = sg.symbol
  ),
  max_row as
  (
   SELECT symbol, max(row_numb) as max_row_numb FROM sales_details GROUP BY 1
  )
- SELECT sales_details.symbol, sales_details.calendarYear, sales_details.revenue as recent_revenue,
- sales_details.revenue_growth as recent_revenue_growth, sales_details.avg_revenue as _5yr_avg_revenue,round(sales_details.carg,2)
- as _5yr_revenue_cagr
+ SELECT sales_details.symbol, sales_details.calendarYear, sales_details.revenue as recent_sales,
+ sales_details.revenue_growth as recent_revenue_growth, sales_details.avg_revenue, yrs.yrs_num as number_of_yrs,
+ round(sales_details.carg,2) as sales_cagr
  FROM sales_details
  LEFT JOIN
  max_row ON sales_details.symbol = max_row.symbol
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = sales_details.symbol
  WHERE sales_details.row_numb = max_row.max_row_numb order by 1,2
  ;
+
  select * from mysql_portfolio.sales_info;
 
 
  -- --------------------------------- free cash flow CAGR ----------------------------------------
  drop table mysql_portfolio.free_cash_flow_info;
- -- create table mysql_portfolio.free_cash_flow_info as
+ create table mysql_portfolio.free_cash_flow_info as
  WITH free_cashflow_growth as
  (
  SELECT symbol,calendarYear,  freeCashFlow,
- -- CASE WHEN freeCashFlow > 0 THEN freeCashFlow ELSE 0.1 END AS freeCashFlow,
  lag(freeCashFlow) over (partition by symbol order by calendarYear) as prev_fcf,
 CASE WHEN freeCashFlow > lag(freeCashFlow) over (partition by symbol order by calendarYear) THEN 'Y' ELSE 'N' END AS fcf_growth,
 round(avg(freeCashFlow) over(partition by symbol order by calendarYear rows between unbounded preceding and unbounded following),2) as avg_fcf,
@@ -277,12 +453,14 @@ THEN
   SELECT symbol, max(row_numb) as max_row_numb FROM free_cashflow_details GROUP BY 1
  )
  SELECT free_cashflow_details.symbol, free_cashflow_details.calendarYear, free_cashflow_details.freeCashFlow as recent_free_cash_flow,
- free_cashflow_details.fcf_growth as recent_fcf_growth, free_cashflow_details.avg_fcf as _5yr_avg_fcf, yrs.yrs_num as number_of_yrs,
+ free_cashflow_details.fcf_growth as recent_fcf_growth, free_cashflow_details.avg_fcf, yrs.yrs_num as number_of_yrs,
  round(free_cashflow_details.carg,2) as fcf_cagr
  FROM free_cashflow_details
  LEFT JOIN
  max_row ON free_cashflow_details.symbol = max_row.symbol
- LEFT JOIN number_of_years yrs ON yrs.symbol = free_cashflow_details.symbol
+ LEFT JOIN number_of_years yrs
+ ON yrs.symbol = free_cashflow_details.symbol
  WHERE free_cashflow_details.row_numb = max_row.max_row_numb order by 1,2
  ;
- SELECT * FROM mysql_portfolio.free_cash_flow_info;
+ SELECT * FROM mysql_portfolio.free_cash_flow_info
+ ;
