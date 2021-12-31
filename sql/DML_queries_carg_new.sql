@@ -358,9 +358,9 @@ THEN
  (
   SELECT symbol, max(row_numb) as max_row_numb FROM sales_details GROUP BY 1
  )
- SELECT sales_details.symbol, sales_details.calendarYear, sales_details.revenue as recent_sales,
+ SELECT sales_details.symbol, sales_details.calendarYear, sales_details.revenue as recent_revenue,
  sales_details.revenue_growth as recent_revenue_growth, sales_details.avg_revenue, yrs.yrs_num as number_of_yrs,
- round(sales_details.carg,2) as sales_cagr
+ round(sales_details.carg,2) as revenue_cagr
  FROM sales_details
  LEFT JOIN
  max_row ON sales_details.symbol = max_row.symbol

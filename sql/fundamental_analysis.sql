@@ -8,7 +8,7 @@ DROP TABLE mysql_portfolio.fundamental_analysis;
    WHEN positive_eps_growth_3yrs = 1 AND recent_eps_growth = 0 THEN 'recent_negative'
    WHEN positive_eps_growth_3yrs = 0 AND recent_eps_growth = 1 THEN 'bit_risky'
    WHEN positive_eps_growth_3yrs = 0 AND recent_eps_growth = 0 THEN 'risky'
-   WHEN positive_eps_growth_3yrs IS NULL OR recent_eps_growth IS NULL THEN 'dana_na' END AS eps_analysis,
+   WHEN positive_eps_growth_3yrs IS NULL OR recent_eps_growth IS NULL THEN 'dana_na' END AS eps_growth_analysis,
    CASE
    WHEN debtToEquity <= 0.5 THEN 'strong'
    WHEN (debtToEquity > 0.5 AND debtToEquity <=0.75) THEN 'bit_risky'
@@ -41,6 +41,9 @@ DROP TABLE mysql_portfolio.fundamental_analysis;
    WHEN roic*100 < 15 THEN 'risky'
    WHEN roic is null THEN 'data_na'END as roic_analysis
 FROM mysql_portfolio.vw_stock_parameter_check;
+
+SELECT * FROM mysql_portfolio.vw_stock_parameter_check;
+
 
 SELECT * FROM mysql_portfolio.fundamental_analysis;
   -- REMEMBER TO ADD/CHECK SHAREHOLDING PATTERN IN FUNDAMENTALS

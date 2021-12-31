@@ -16,7 +16,7 @@ SHOW COLUMNS FROM mysql_portfolio.price_cashflow_info;
 
 -- ------------------------------ PRICE TO CASH FLOW ANALYSIS ----------------------------------------------
 drop table mysql_portfolio.price_cashflow_info;
--- create table  mysql_portfolio.price_cashflow_info as
+create table  mysql_portfolio.price_cashflow_info as
 WITH cash_flow_rownum as
  (
   SELECT *,row_number() over (partition by symbol order by calendarYear) as row_numb
@@ -77,9 +77,9 @@ SELECT DISTINCT
     END AS company_cap,
     screener.beta,
     pepb.*,
-    ebitda.recent_ebitda,ebitda.recent_ebitda_growth,ebitda._5yr_avg_ebitda,ebitda._5yr_ebitda_cagr,
-    netincome.recent_netincome,netincome.recent_netincome_growth,netincome._5yr_avg_netincome,netincome._5yr_netincome_cagr,
-    sales.recent_revenue,sales.recent_revenue_growth,sales._5yr_avg_revenue,sales._5yr_revenue_cagr,
+    ebitda.recent_ebitda,ebitda.recent_ebitda_growth,ebitda.avg_ebitda,ebitda.ebitda_cagr,
+    netincome.recent_netincome,netincome.recent_netincome_growth,netincome.avg_netincome,netincome.netincome_cagr,
+    sales.recent_revenue,sales.recent_revenue_growth,sales.avg_revenue,sales.revenue_cagr,
     pcashflow.freeCashFlow,pcashflow.latest_cash_flow_date,pcashflow.operatingCashFlow,
     pcashflow.price_fcf_ratio,pcashflow.price_ocf_ratio,keymetrics.priceToSalesRatio,
     keymetrics.dividendYield, keymetrics.debtToEquity,keymetrics.currentRatio,keymetrics.roe,keymetrics.roic,keymetrics.inventoryTurnover,
