@@ -17,7 +17,7 @@
    WHEN pbratio IS NULL THEN 'data_na' END as pb_ratio_analysis,
    CASE
    WHEN ratio_pe_into_pb <=22.5 THEN 'undervalued'
-   WHEN (ratio_pe_into_pb > 22.5 AND ratio_pe_into_pb <=40) THEN 'conisderable'
+   WHEN (ratio_pe_into_pb > 22.5 AND ratio_pe_into_pb <=40) THEN 'considerable'
    WHEN ratio_pe_into_pb > 40 THEN 'overvalued'
    WHEN ratio_pe_into_pb IS NULL THEN 'data_na' END AS pepb_ratio_analysis,
    CASE
@@ -27,7 +27,7 @@
    WHEN priceToSalesRatio is null THEN 'data_na'END as price_to_sales_analysis,
    CASE
    WHEN price_ocf_ratio <=10 THEN 'undervalued'
-   WHEN (price_ocf_ratio > 10 AND price_ocf_ratio <=15) THEN 'conisderable'
+   WHEN (price_ocf_ratio > 10 AND price_ocf_ratio <=15) THEN 'considerable'
    WHEN price_ocf_ratio > 15 THEN 'overvalued'
    WHEN price_ocf_ratio IS NULL THEN 'data_na' END AS price_ocf_analysis
    FROM mysql_portfolio.vw_stock_parameter_check;

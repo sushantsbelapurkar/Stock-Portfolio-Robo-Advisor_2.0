@@ -8,7 +8,7 @@ DROP TABLE mysql_portfolio.fundamental_analysis;
    WHEN positive_eps_growth_3yrs = 1 AND recent_eps_growth = 0 THEN 'recent_negative'
    WHEN positive_eps_growth_3yrs = 0 AND recent_eps_growth = 1 THEN 'bit_risky'
    WHEN positive_eps_growth_3yrs = 0 AND recent_eps_growth = 0 THEN 'risky'
-   WHEN positive_eps_growth_3yrs IS NULL OR recent_eps_growth IS NULL THEN 'dana_na' END AS eps_growth_analysis,
+   WHEN positive_eps_growth_3yrs IS NULL OR recent_eps_growth IS NULL THEN 'data_na' END AS eps_growth_analysis,
    CASE
    WHEN debtToEquity <= 0.5 THEN 'strong'
    WHEN (debtToEquity > 0.5 AND debtToEquity <=0.75) THEN 'bit_risky'
@@ -25,7 +25,7 @@ DROP TABLE mysql_portfolio.fundamental_analysis;
    WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
    AND (inventoryTurnover > 2 AND inventoryTurnover<=5) THEN 'bit_risky'
    WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
-   AND inventoryTurnover <=2 THEN 'bit_risky'
+   AND inventoryTurnover <=2 THEN 'risky'
    WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
    AND inventoryTurnover IS NULL THEN 'data_na'
    WHEN (sector = 'Technology' or sector = 'Financial Services' or sector = 'Communication Services' or sector = 'Financial' or sector = 'Services' or sector = 'Banking' or sector = 'Media' or sector = 'Insurance')

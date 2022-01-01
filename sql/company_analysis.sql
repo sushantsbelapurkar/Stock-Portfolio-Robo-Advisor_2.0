@@ -1,4 +1,5 @@
-
+ DROP TABLE mysql_portfolio.company_analysis;
+ CREATE TABLE mysql_portfolio.company_analysis AS
  SELECT fundamental.symbol,fundamental.calendarYear,fundamental.eps_growth_analysis,fundamental.debt_to_equity_analysis,
  fundamental.current_ratio_analysis,fundamental.inventory_analysis,fundamental.roe_analysis,fundamental.roic_analysis,
  value.pe_ratio_analysis,value.pe_and_sector_pe_analysis,value.pb_ratio_analysis,value.pepb_ratio_analysis,
@@ -11,6 +12,198 @@
  ON value.symbol = fundamental.symbol
  LEFT JOIN mysql_portfolio.growth_analysis growth
  ON growth.symbol = fundamental.symbol;
+
+ SELECT * FROM mysql_portfolio.company_analysis;
+
+ DROP TABLE mysql_portfolio.company_score;
+ CREATE TABLE mysql_portfolio.company_score AS
+ WITH param_score AS
+ (
+ SELECT comp.symbol, comp.calendarYear,
+ CASE
+ WHEN comp.eps_growth_analysis = 'strong' THEN 10
+ WHEN (comp.eps_growth_analysis = 'recent_negative' OR comp.eps_growth_analysis = 'bit_risky') THEN 7
+ WHEN (comp.eps_growth_analysis = 'risky' OR comp.eps_growth_analysis = 'data_na') THEN 3
+ END AS eps_growth_score,
+ CASE
+ WHEN comp.debt_to_equity_analysis = 'strong' THEN 10
+ WHEN comp.debt_to_equity_analysis = 'bit_risky' THEN 7
+ WHEN (comp.debt_to_equity_analysis = 'risky' OR comp.debt_to_equity_analysis = 'data_na') THEN 3
+ END AS debt_to_equity_score,
+ CASE
+ WHEN comp.current_ratio_analysis = 'strong' THEN 10
+ WHEN comp.current_ratio_analysis = 'bit_risky' THEN 7
+ WHEN (comp.current_ratio_analysis = 'risky' OR comp.current_ratio_analysis = 'data_na') THEN 3
+ END AS current_ratio_score,
+ CASE
+ WHEN comp.inventory_analysis = 'strong' THEN 5
+ WHEN comp.inventory_analysis = 'bit_risky' THEN 3
+ WHEN (comp.inventory_analysis = 'risky' OR comp.inventory_analysis = 'data_na') THEN 1
+ WHEN comp.inventory_analysis = 'na' THEN 0
+ END AS inventory_score,
+ CASE
+ WHEN comp.roe_analysis = 'strong' THEN 10
+ WHEN comp.roe_analysis = 'good' THEN 8
+ WHEN (comp.roe_analysis = 'risky' OR comp.roe_analysis = 'data_na') THEN 1
+ END AS roe_score,
+ CASE
+ WHEN comp.roic_analysis = 'strong' THEN 5
+ WHEN comp.roic_analysis = 'good' THEN 4
+ WHEN (comp.roic_analysis = 'risky' OR comp.roic_analysis = 'data_na') THEN 1
+ END AS roic_score,
+ CASE
+ WHEN comp.pe_ratio_analysis = 'undervalued' THEN 8
+ WHEN comp.pe_ratio_analysis = 'considerable' THEN 6
+ WHEN (comp.pe_ratio_analysis = 'overvalued' OR comp.pe_ratio_analysis = 'data_na') THEN 3
+ END AS pe_ratio_score,
+ CASE
+ WHEN comp.pb_ratio_analysis = 'undervalued' THEN 8
+ WHEN comp.pb_ratio_analysis = 'considerable' THEN 6
+ WHEN (comp.pb_ratio_analysis = 'overvalued' OR comp.pb_ratio_analysis = 'data_na') THEN 3
+ END AS pb_ratio_score,
+ CASE
+ WHEN comp.pepb_ratio_analysis = 'undervalued' THEN 10
+ WHEN comp.pepb_ratio_analysis = 'considerable' THEN 8
+ WHEN (comp.pepb_ratio_analysis = 'overvalued' OR comp.pepb_ratio_analysis = 'data_na') THEN 3
+ END AS pepb_ratio_score,
+ CASE
+ WHEN comp.pe_and_sector_pe_analysis = 'undervalued_than_sector' THEN 5
+ WHEN comp.pe_and_sector_pe_analysis = 'overvalued_than_sector' THEN 3
+ END AS pe_vs_sector_pe_score,
+ CASE
+ WHEN comp.price_to_sales_analysis = 'strong' THEN 5
+ WHEN comp.price_to_sales_analysis = 'good' THEN 4
+ WHEN (comp.price_to_sales_analysis = 'risky' OR comp.price_to_sales_analysis = 'data_na') THEN 1
+ END AS price_to_sales_score,
+ CASE
+ WHEN comp.price_ocf_analysis = 'undervalued' THEN 8
+ WHEN comp.price_ocf_analysis = 'considerable' THEN 6
+ WHEN (comp.price_ocf_analysis = 'overvalued' OR comp.price_ocf_analysis = 'data_na') THEN 3
+ END AS price_ocf_score,
+ CASE
+ WHEN comp.ebitda_growth = 'hyper_growth' THEN 10
+ WHEN (comp.ebitda_growth = 'very_rapid_growth' OR comp.ebitda_growth = 'rapid_growth') THEN 8
+ WHEN comp.ebitda_growth = 'good_growth' THEN 6
+ WHEN (comp.ebitda_growth = 'slow_growth' OR comp.ebitda_growth = 'data_na') THEN 3
+ END AS ebitda_growth_score,
+ CASE
+ WHEN comp.netincome_growth = 'hyper_growth' THEN 5
+ WHEN (comp.netincome_growth = 'very_rapid_growth' OR comp.netincome_growth = 'rapid_growth') THEN 3
+ WHEN comp.netincome_growth = 'good_growth' THEN 2
+ WHEN (comp.netincome_growth = 'slow_growth' OR comp.netincome_growth = 'data_na') THEN 1
+ END AS netincome_growth_score,
+ CASE
+ WHEN comp.sales_growth = 'hyper_growth' THEN 5
+ WHEN (comp.sales_growth = 'very_rapid_growth' OR comp.sales_growth = 'rapid_growth') THEN 3
+ WHEN comp.sales_growth = 'good_growth' THEN 2
+ WHEN (comp.sales_growth = 'slow_growth' OR comp.sales_growth = 'data_na') THEN 1
+ END AS sales_growth_score,
+ CASE
+ WHEN comp.roe_growth = 'hyper_growth' THEN 10
+ WHEN (comp.roe_growth = 'very_rapid_growth' OR comp.roe_growth = 'rapid_growth') THEN 8
+ WHEN comp.roe_growth = 'good_growth' THEN 6
+ WHEN (comp.roe_growth = 'slow_growth' OR comp.roe_growth = 'data_na') THEN 3
+ END AS roe_growth_score,
+ CASE
+ WHEN comp.shareholder_equity_growth = 'positive' THEN 5
+ WHEN comp.shareholder_equity_growth = 'no_change' THEN 3
+ WHEN (comp.shareholder_equity_growth = 'negative' OR comp.shareholder_equity_growth = 'data_na') THEN 1
+ END AS shareholder_equity_growth_score,
+ CASE
+ WHEN comp.operating_cash_flow_growth = 'positive' THEN 8
+ WHEN comp.operating_cash_flow_growth = 'no_change' THEN 5
+ WHEN (comp.operating_cash_flow_growth = 'negative' OR comp.operating_cash_flow_growth = 'data_na') THEN 3
+ END AS operating_cash_flow_growth_score,
+ CASE
+ WHEN comp.divident_growth = 'positive' THEN 5
+ WHEN comp.divident_growth = 'no_change' THEN 3
+ WHEN (comp.divident_growth = 'negative' OR comp.divident_growth = 'data_na') THEN 1
+ END AS divident_growth_score,
+ CASE
+ WHEN comp.rdexpense_growth = 'positive' THEN 5
+ WHEN comp.rdexpense_growth = 'no_change' THEN 3
+ WHEN (comp.rdexpense_growth = 'negative' OR comp.rdexpense_growth = 'data_na') THEN 1
+ END AS rdexpense_growth_score,
+ CASE
+ WHEN comp.capex_growth_ofc = 'positive' THEN 5
+ WHEN comp.capex_growth_ofc = 'no_change' THEN 3
+ WHEN (comp.capex_growth_ofc = 'negative' OR comp.capex_growth_ofc = 'data_na') THEN 1
+ END AS capex_growth_ofc_score,
+ CASE
+ WHEN comp.capex_growth_revenue = 'positive' THEN 5
+ WHEN comp.capex_growth_revenue = 'no_change' THEN 3
+ WHEN (comp.capex_growth_revenue = 'negative' OR comp.capex_growth_revenue = 'data_na') THEN 1
+ END AS capex_growth_revenue_score,
+ CASE
+ WHEN comp.is_roic_greater_wacc = 'Y' THEN 10
+ WHEN comp.is_roic_greater_wacc = 'N' THEN 5
+ ELSE 0
+ END AS roic_wacc_score
+ FROM mysql_portfolio.company_analysis comp
+ ),
+ fundamenta_score AS
+ (
+  SELECT symbol,
+  (eps_growth_score+debt_to_equity_score+current_ratio_score+roe_score+roic_score+pe_ratio_score+pb_ratio_score+pepb_ratio_score) as fundamental_score
+  FROM param_score
+  ),
+  growth_score AS
+  (
+	SELECT symbol,
+    (ebitda_growth_score+netincome_growth_score+sales_growth_score+roe_growth_score+shareholder_equity_growth_score+operating_cash_flow_growth_score
+    +divident_growth_score+rdexpense_growth_score+capex_growth_ofc_score+capex_growth_revenue_score) as growth_score
+    FROM param_score
+  ),
+  main_param_score AS
+  (
+    SELECT symbol,
+    (eps_growth_score+debt_to_equity_score+current_ratio_score+roe_score+pepb_ratio_score+ebitda_growth_score+sales_growth_score+roe_growth_score+
+    roic_wacc_score) AS main_score FROM param_score
+  ),
+    total_score AS
+    (
+     SELECT param.symbol,
+     fun.fundamental_score, gr.growth_score, main.main_score as main_param_score,
+     (fun.fundamental_score+gr.growth_score+param.inventory_score+param.pe_vs_sector_pe_score+param.price_ocf_score+param.price_to_sales_score
+     +param.roic_wacc_score) as total_score
+     FROM param_score param
+     LEFT JOIN fundamenta_score fun ON fun.symbol = param.symbol
+     LEFT JOIN growth_score gr ON gr.symbol = param.symbol
+     LEFT JOIN main_param_score main ON main.symbol = param.symbol
+     ),
+     all_score AS
+     (
+     SELECT param.symbol,param.calendarYear, fun.fundamental_score,gr.growth_score, main.main_score,total.total_score,
+     CASE
+     WHEN fun.fundamental_score >=62 THEN 'buy'
+     WHEN fun.fundamental_score >=53 AND fun.fundamental_score <62  THEN 'border_level'
+     WHEN fun.fundamental_score >=37 AND fun.fundamental_score <53  THEN 'risky'
+     ELSE 'weak' END AS fundamental_signal,
+     CASE
+     WHEN gr.growth_score >=57 THEN 'buy'
+     WHEN gr.growth_score >=47 AND gr.growth_score <57  THEN 'border_level'
+     WHEN gr.growth_score >=37 AND gr.growth_score <47  THEN 'risky'
+     ELSE 'weak' END AS growth_signal,
+	 CASE
+     WHEN main.main_score >=78 THEN 'buy'
+     WHEN main.main_score >=66 AND main.main_score <78  THEN 'border_level'
+     WHEN main.main_score >=49 AND main.main_score <66  THEN 'risky'
+     ELSE 'weak' END AS main_param_signal,
+	 CASE
+     WHEN total.total_score >=146 THEN 'buy'
+     WHEN gr.growth_score >=121 AND gr.growth_score <146  THEN 'border_level'
+     WHEN gr.growth_score >=88 AND gr.growth_score <121  THEN 'risky'
+     ELSE 'weak' END AS overall_signal,
+     param.roic_wacc_score,param.inventory_score
+     FROM param_score param
+     LEFT JOIN fundamenta_score fun ON fun.symbol = param.symbol
+     LEFT JOIN growth_score gr ON gr.symbol = param.symbol
+     LEFT JOIN main_param_score main ON main.symbol = param.symbol
+     LEFT JOIN total_score total ON total.symbol = param.symbol
+     )
+     SELECT * from all_score;
+
+ SELECT * FROM mysql_portfolio.company_score;
 
  DROP TABLE mysql_portfolio.fair_price_analysis;
 CREATE TABLE mysql_portfolio.fair_price_analysis AS
