@@ -18,7 +18,10 @@ AND year(balance_sheet.date) =  (SELECT MAX(year(date)) FROM mysql_portfolio.key
 WHERE year(income_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.income_statement)
 ;
 
-DROP TABLE mysql_portfolio.gdp_data;
+DELIMITER //
+CREATE PROCEDURE mysql_portfolio.dcf_info()
+BEGIN
+-- DROP TABLE mysql_portfolio.gdp_data;
  CREATE TABLE mysql_portfolio.gdp_data
  (
    country varchar(20),
@@ -28,12 +31,12 @@ DROP TABLE mysql_portfolio.gdp_data;
 
  INSERT INTO mysql_portfolio.gdp_data VALUES ('USA', 2021, 2.4);
  INSERT INTO mysql_portfolio.gdp_data VALUES ('India', 2021, 5.4);
- SELECT * FROM mysql_portfolio.gdp_data;
+--  SELECT * FROM mysql_portfolio.gdp_data;
 
 -- METHOD 2 --> MOSTLY USED SIMPLE FREE CASHFLOW METHOD --> USING NOW
 -- SOURCE = https://www.youtube.com/watch?v=fd_emLLzJnk&t=645s
 -- CONSIDERING PERPETUALL GROWTH RATE = 3.2% OR 0.032 : source: https://macabacus.com/valuation/dcf/terminal-value
-DROP TABLE mysql_portfolio.progressive_free_cashflow;
+-- DROP TABLE mysql_portfolio.progressive_free_cashflow;
 CREATE TABLE mysql_portfolio.progressive_free_cashflow as
 SELECT terminal.*,wacc_data.wacc,
 -- CASE
@@ -74,9 +77,9 @@ LEFT JOIN mysql_portfolio.wacc_data
 ON wacc_data.symbol = terminal.symbol
 -- AND year(wacc_data.date) = (SELECT MAX(year(wacc_data.date)) FROM mysql_portfolio.wacc_data)
 ;
-SELECT * FROM mysql_portfolio.progressive_free_cashflow;
+-- SELECT * FROM mysql_portfolio.progressive_free_cashflow;
 
-DROP TABLE mysql_portfolio.dcf_data;
+-- DROP TABLE mysql_portfolio.dcf_data;
 CREATE TABLE mysql_portfolio.dcf_data as
 SELECT dcf.*,shares_float.outstandingShares, (todays_value/shares_float.outstandingShares) as dcf_fair_value FROM
 (
@@ -94,6 +97,15 @@ LEFT JOIN mysql_portfolio.shares_float
 ON  shares_float.symbol = dcf.symbol
 -- AND year(shares_float.date) = (SELECT MAX(year(shares_float.date)) FROM mysql_portfolio.shares_float)
 ;
-SELECT * FROM mysql_portfolio.dcf_data
-;
+
+END //
+DELIMITER ;
+SELECT * FROM mysql_portfolio.dcf_data;
+
+
+-- SELECT 56118000000*(1+(12.2/100.00));
+-- SELECT freeCashFlow from mysql_portfolio.cash_flow_statement where symbol = 'AAPL' AND year(date)= 2018;
+-- SELECT ebitda from mysql_portfolio.income_statement where symbol = 'AAPL' AND year(date)= 2017;
+--
+
 

@@ -1,4 +1,7 @@
-DROP TABLE mysql_portfolio.growth_analysis;
+DELIMITER //
+  CREATE PROCEDURE mysql_portfolio.growth_analysis_info()
+  BEGIN
+-- DROP TABLE mysql_portfolio.growth_analysis;
   CREATE TABLE mysql_portfolio.growth_analysis AS
    SELECT stock_param.symbol,stock_param.latest_price_date, stock_param.recent_ebitda_growth,stock_param.ebitda_cagr,
    stock_param.recent_netincome_growth,stock_param.netincome_cagr,stock_param.recent_revenue_growth,stock_param.revenue_cagr,
@@ -86,6 +89,8 @@ DROP TABLE mysql_portfolio.growth_analysis;
    ON wacc_data.symbol = stock_param.symbol
    AND YEAR(wacc_data.date) = stock_param.calendarYear
    ;
+   END //
+   DELIMITER ;
 
    SELECT * FROM mysql_portfolio.growth_analysis;
 

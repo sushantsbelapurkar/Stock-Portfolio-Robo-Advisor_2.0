@@ -1,5 +1,8 @@
   -- REMEMBER TO ADD/CHECK SHAREHOLDING PATTERN IN FUNDAMENTALS
-DROP TABLE mysql_portfolio.fundamental_analysis;
+  DELIMITER //
+  CREATE PROCEDURE mysql_portfolio.fundamental_analysis_info()
+  BEGIN
+-- DROP TABLE mysql_portfolio.fundamental_analysis;
    CREATE TABLE mysql_portfolio.fundamental_analysis AS
    SELECT symbol,industry,sector,calendarYear,positive_eps_growth_3yrs,recent_eps_growth,debtToEquity,currentRatio,inventoryTurnover,
    roe,roic,
@@ -20,15 +23,15 @@ DROP TABLE mysql_portfolio.fundamental_analysis;
    WHEN currentRatio < 1.1 THEN 'risky'
    WHEN currentRatio IS NULL THEN 'data_na' END AS current_ratio_analysis,
    CASE
-   WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
+   WHEN (sector <> "Technology" or sector <> "Financial Services" or sector <> "Communication Services" or sector <> "Financial" or sector <> "Services" or sector <> "Banking" or sector <> "Media" or sector <> "Insurance")
    AND inventoryTurnover > 5 THEN 'strong'
-   WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
+   WHEN (sector <> "Technology" or sector <> "Financial Services" or sector <> "Communication Services" or sector <> "Financial" or sector <> "Services" or sector <> "Banking" or sector <> "Media" or sector <> "Insurance")
    AND (inventoryTurnover > 2 AND inventoryTurnover<=5) THEN 'bit_risky'
-   WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
+   WHEN (sector <> "Technology" or sector <> "Financial Services" or sector <> "Communication Services" or sector <> "Financial" or sector <> "Services" or sector <> "Banking" or sector <> "Media" or sector <> "Insurance")
    AND inventoryTurnover <=2 THEN 'risky'
-   WHEN (sector != 'Technology' or sector != 'Financial Services' or sector != 'Communication Services' or sector != 'Financial' or sector != 'Services' or sector != 'Banking' or sector != 'Media' or sector != 'Insurance')
+   WHEN (sector <> "Technology" or sector <> "Financial Services" or sector <> "Communication Services" or sector <> "Financial" or sector <> "Services" or sector <> "Banking" or sector <> "Media" or sector <> "Insurance")
    AND inventoryTurnover IS NULL THEN 'data_na'
-   WHEN (sector = 'Technology' or sector = 'Financial Services' or sector = 'Communication Services' or sector = 'Financial' or sector = 'Services' or sector = 'Banking' or sector = 'Media' or sector = 'Insurance')
+   WHEN (sector = "Technology" or sector = "Financial Services" or sector = "Communication Services" or sector = "Financial" or sector = "Services" or sector = "Banking" or sector = "Media" or sector = "Insurance")
    THEN 'na' END AS inventory_analysis,
    CASE
    WHEN roe*100 > 25 THEN 'strong'
@@ -42,8 +45,11 @@ DROP TABLE mysql_portfolio.fundamental_analysis;
    WHEN roic is null THEN 'data_na'END as roic_analysis
 FROM mysql_portfolio.vw_stock_parameter_check;
 
+END //
+DELIMITER ;
+
 SELECT * FROM mysql_portfolio.vw_stock_parameter_check;
 
-
 SELECT * FROM mysql_portfolio.fundamental_analysis;
+
   -- REMEMBER TO ADD/CHECK SHAREHOLDING PATTERN IN FUNDAMENTALS

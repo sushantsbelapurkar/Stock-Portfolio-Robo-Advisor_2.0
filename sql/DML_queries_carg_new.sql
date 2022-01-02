@@ -1,4 +1,4 @@
-SELECT * FROM mysql_portfolio.symbol_list -- where symbol in ('TIDEWATER.NS','MRF.NS','CANFINHOME.NS')
+SELECT * FROM mysql_portfolio.symbol_list; -- where symbol in ('TIDEWATER.NS','MRF.NS','CANFINHOME.NS')
 ;
 SELECT * FROM mysql_portfolio.shares_float;
 -- DROP TABLE mysql_portfolio.balance_sheet;
@@ -40,8 +40,10 @@ SELECT * FROM mysql_portfolio.balance_sheet WHERE symbol = 'AAPL' AND YEAR(date)
 USE mysql_portfolio;
 
 -- eps calculation for last 5 years--------------------
-
- drop table mysql_portfolio.eps_info;
+DELIMITER //
+CREATE PROCEDURE mysql_portfolio.eps_info ()
+BEGIN
+ -- drop table mysql_portfolio.eps_info;
  create table mysql_portfolio.eps_info as
  WITH eps_growth AS
  (
@@ -71,8 +73,10 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
  ON max_row.symbol = eps_details.symbol
  WHERE eps_details.row_numb = max_row.max_row_numb order by 1,2
  ;
+ END //
+ DELIMITER ;
 
- select * from mysql_portfolio.eps_info order by symbol;
+ -- select * from mysql_portfolio.eps_info order by symbol;
 
  -- ---------------------------------- CAGR DATA -------------------------------
  -- REFERENCE : https://www.linkedin.com/pulse/reply-how-handle-percent-change-cagr-negative-numbers-timo-krall/
@@ -89,7 +93,10 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
 --     Case Else
 --         CAGR_flexible = 0
  -- --------------------------------- ebitda CAGR -----------------------------
- drop table mysql_portfolio.ebitda_info;
+ DELIMITER //
+CREATE PROCEDURE mysql_portfolio.cagr_info()
+BEGIN
+ -- drop table mysql_portfolio.ebitda_info;
  create table mysql_portfolio.ebitda_info as
  WITH ebitda_growth as
  (
@@ -180,11 +187,11 @@ THEN
  WHERE ebitda_details.row_numb = max_row.max_row_numb order by 1,2
  ;
 
- select * from mysql_portfolio.ebitda_info;
+ -- select * from mysql_portfolio.ebitda_info;
 
 
  -- --------------------------------- netincome CAGR ----------------------------------------
- drop table mysql_portfolio.netincome_info;
+ -- drop table mysql_portfolio.netincome_info;
  create table mysql_portfolio.netincome_info as
  WITH netincome_growth as
  (
@@ -274,12 +281,11 @@ THEN
  WHERE netincome_details.row_numb = max_row.max_row_numb order by 1,2
  ;
 
- SELECT * FROM mysql_portfolio.netincome_info
- ;
+ -- SELECT * FROM mysql_portfolio.netincome_info;
 
 
  -- --------------------------------- sales/revenue CAGR ----------------------------------------
- drop table mysql_portfolio.sales_info;
+ -- drop table mysql_portfolio.sales_info;
  create table mysql_portfolio.sales_info as
  WITH sales_growth as
  (
@@ -369,11 +375,11 @@ THEN
  WHERE sales_details.row_numb = max_row.max_row_numb order by 1,2
  ;
 
- select * from mysql_portfolio.sales_info;
+ -- select * from mysql_portfolio.sales_info;
 
 
  -- --------------------------------- free cash flow CAGR ----------------------------------------
- drop table mysql_portfolio.free_cash_flow_info;
+ -- drop table mysql_portfolio.free_cash_flow_info;
  create table mysql_portfolio.free_cash_flow_info as
  WITH free_cashflow_growth as
  (
@@ -462,5 +468,6 @@ THEN
  ON yrs.symbol = free_cashflow_details.symbol
  WHERE free_cashflow_details.row_numb = max_row.max_row_numb order by 1,2
  ;
- SELECT * FROM mysql_portfolio.free_cash_flow_info
- ;
+--  SELECT * FROM mysql_portfolio.free_cash_flow_info;
+END //
+DELIMITER ;

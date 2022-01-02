@@ -44,7 +44,10 @@ SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calen
  SELECT * FROM mysql_portfolio.price_cashflow_info;
 
  -- --------------------------- DECISION PARAMETER GATHERING view FILE ----------------------------
-DROP VIEW mysql_portfolio.vw_stock_parameter_check;
+ DELIMITER //
+ CREATE PROCEDURE mysql_portfolio.decision_view_info()
+ BEGIN
+-- DROP VIEW mysql_portfolio.vw_stock_parameter_check;
 CREATE VIEW mysql_portfolio.vw_stock_parameter_check AS
 WITH key_metrics_rownum as
  (
@@ -104,5 +107,7 @@ SELECT DISTINCT
     AND pepb.symbol is not null order by symbol
   --   AND screener.symbol in ('AAPL','MSFT')
     ;
+    END //
+    DELIMITER ;
 
-    SELECT * FROM mysql_portfolio.vw_stock_parameter_check;
+  --   SELECT * FROM mysql_portfolio.vw_stock_parameter_check;

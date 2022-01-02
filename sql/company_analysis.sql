@@ -1,4 +1,7 @@
- DROP TABLE mysql_portfolio.company_analysis;
+ DELIMITER //
+ CREATE PROCEDURE mysql_portfolio.company_analysis_score_info()
+ BEGIN
+ -- DROP TABLE mysql_portfolio.company_analysis;
  CREATE TABLE mysql_portfolio.company_analysis AS
  SELECT fundamental.symbol,fundamental.calendarYear,fundamental.eps_growth_analysis,fundamental.debt_to_equity_analysis,
  fundamental.current_ratio_analysis,fundamental.inventory_analysis,fundamental.roe_analysis,fundamental.roic_analysis,
@@ -13,9 +16,9 @@
  LEFT JOIN mysql_portfolio.growth_analysis growth
  ON growth.symbol = fundamental.symbol;
 
- SELECT * FROM mysql_portfolio.company_analysis;
+ -- SELECT * FROM mysql_portfolio.company_analysis;
 
- DROP TABLE mysql_portfolio.company_score;
+ -- DROP TABLE mysql_portfolio.company_score;
  CREATE TABLE mysql_portfolio.company_score AS
  WITH param_score AS
  (
@@ -194,24 +197,31 @@
      WHEN gr.growth_score >=121 AND gr.growth_score <146  THEN 'border_level'
      WHEN gr.growth_score >=88 AND gr.growth_score <121  THEN 'risky'
      ELSE 'weak' END AS overall_signal,
-     param.roic_wacc_score,param.inventory_score
+     param.roic_wacc_score,param.inventory_score,
+     api_rating.rating as api_rating, api_rating.ratingScore as api_score
      FROM param_score param
      LEFT JOIN fundamenta_score fun ON fun.symbol = param.symbol
      LEFT JOIN growth_score gr ON gr.symbol = param.symbol
      LEFT JOIN main_param_score main ON main.symbol = param.symbol
      LEFT JOIN total_score total ON total.symbol = param.symbol
+     LEFT JOIN mysql_portfolio.api_rating
+     ON api_rating.symbol = param.symbol
      )
      SELECT * from all_score;
 
- SELECT * FROM mysql_portfolio.company_score;
+ -- SELECT * FROM mysql_portfolio.company_score;
+--  SELECT * FROM mysql_portfolio.stock_peer;
+--  DROP TABLE mysql_portfolio.stock_peer;
+--  SELECT * FROM mysql_portfolio.api_rating;
 
- DROP TABLE mysql_portfolio.fair_price_analysis;
+-- DROP TABLE mysql_portfolio.fair_price_analysis;
 CREATE TABLE mysql_portfolio.fair_price_analysis AS
 WITH fair_price AS
 (
 SELECT eps_info.symbol,eps_info.calendarYear,
 round(15*eps_info._5yr_avg_eps,2) as eps_fair_value,round(key_metrics.grahamNumber,2) as graham_number,
 round(dcf_data.dcf_fair_value,2) as dcf_fair_value,
+round(api_dcf.dcf,2) as api_dcf_value,
 price.latest_price_date,price.latest_close_price, price._50day_avg_price
  FROM mysql_portfolio.eps_info
  LEFT JOIN mysql_portfolio.key_metrics
@@ -220,6 +230,8 @@ price.latest_price_date,price.latest_close_price, price._50day_avg_price
  LEFT JOIN mysql_portfolio.dcf_data
  ON dcf_data.symbol = eps_info.symbol
  AND dcf_data.calendarYear = eps_info.calendarYear
+ LEFT JOIN mysql_portfolio.api_dcf
+ ON api_dcf.symbol = eps_info.symbol
  LEFT JOIN mysql_portfolio._50_day_avg_price_info price
  ON price.symbol = eps_info.symbol
  )
@@ -235,8 +247,12 @@ WHEN latest_close_price <= dcf_fair_value THEN 'undervalued'
 ELSE 'overvalued' END AS latest_price_compared_to_dcf
 FROM fair_price
  ;
+ END //
+ DELIMITER ;
 
  SELECT * FROM mysql_portfolio.fair_price_analysis;
+
+SELECT * FROM mysql_portfolio.dcf_values;
 SELECT * FROM mysql_portfolio._50_day_avg_price_info;
  SELECT * FROM mysql_portfolio.eps_info;
   SELECT * FROM mysql_portfolio.dcf_data;
