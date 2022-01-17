@@ -98,10 +98,12 @@ round(100-((_50day_avg_price*100)/_200day_avg_price),2) as percent_diff_in_50_20
 FROM _50_200_days
 ;
 -- SELECT * FROM mysql_portfolio.golden_death_cross;
+SELECT 'sp_golden_death_cross_completed';
 END //
 DELIMITER ;
 
  -- ---------------------------------- PE-PB ANALYSIS ----------------------------------------------------
+ DROP PROCEDURE mysql_portfolio.pepb_info;
  DELIMITER //
 CREATE PROCEDURE mysql_portfolio.pepb_info()
 BEGIN
@@ -124,13 +126,13 @@ BEGIN
   )
  SELECT
  eps.*,_50day.latest_price_date,_50day.latest_close_price,_50day._50day_avg_price, _200day._200day_avg_price,_5year._5yr_avg_price,
- round(_50day_avg_price/ttm_eps,2) as current_pe_ratio,round(_200day_avg_price/ttm_eps,2) as _200day_pe_ratio,
- round(_5yr_avg_price/_5yr_avg_eps,2) as _5year_pe_ratio,
- round((round(_50day_avg_price/ttm_eps,2)+round(_200day_avg_price/ttm_eps,2)+round(_5yr_avg_price/_5yr_avg_eps,2))/3,2) as final_pe_ratio,
+ round(_50day_avg_price/NULLIF(ttm_eps,0),2) as current_pe_ratio,round(_200day_avg_price/NULLIF(ttm_eps,0),2) as _200day_pe_ratio,
+ round(_5yr_avg_price/NULLIF(_5yr_avg_eps,0),2) as _5year_pe_ratio,
+ round((round(_50day_avg_price/NULLIF(ttm_eps,0),2)+round(_200day_avg_price/NULLIF(ttm_eps,0),2)+round(_5yr_avg_price/NULLIF(_5yr_avg_eps,0),2))/3,2) as final_pe_ratio,
  key_metrics_maxyr.bookValuePerShare,
- round(_50day_avg_price/key_metrics_maxyr.bookValuePerShare,2) as pbratio,
- round((_50day_avg_price/key_metrics_maxyr.bookValuePerShare)
- *(round((round(_50day_avg_price/ttm_eps,2)+round(_200day_avg_price/ttm_eps,2)+round(_5yr_avg_price/_5yr_avg_eps,2))/3,2)),2) as ratio_pe_into_pb
+ round(_50day_avg_price/NULLIF(key_metrics_maxyr.bookValuePerShare,0),2) as pbratio,
+ round((_50day_avg_price/NULLIF(key_metrics_maxyr.bookValuePerShare,0))
+ *(round((round(_50day_avg_price/NULLIF(ttm_eps,0),2)+round(_200day_avg_price/NULLIF(ttm_eps,0),2)+round(_5yr_avg_price/NULLIF(_5yr_avg_eps,0),2))/3,2)),2) as ratio_pe_into_pb
  -- (pe_ratio1+pe_ratio2+pe_ratio3+pe_ratio4)/4 as avg_pe_ratio
  FROM
  mysql_portfolio.eps_info eps
@@ -143,6 +145,7 @@ BEGIN
  LEFT JOIN key_metrics_maxyr
  ON eps.symbol = key_metrics_maxyr.symbol
  ;
+ SELECT 'sp_pepb_info_completed';
  END //
 DELIMITER ;
 
@@ -153,6 +156,7 @@ DELIMITER ;
 --  SELECT * FROM mysql_portfolio.historical_prices LIMIT 200;
 
 -- ------------------------------ PRICE TO CASH FLOW ANALYSIS ----------------------------------------------
+DROP PROCEDURE mysql_portfolio.price_cah_flow_info;
 DELIMITER //
 CREATE PROCEDURE mysql_portfolio.price_cah_flow_info()
 BEGIN
@@ -170,8 +174,8 @@ WITH cash_flow_rownum as
 SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calendarYear, cash_flow.freeCashFlow,cash_flow.operatingCashFlow,
  _50day._50day_avg_price, _50day.latest_price_date, shares_float.outstandingShares,
  (_50day._50day_avg_price*shares_float.outstandingShares) as outstanding_share_total_price,
- ((_50day._50day_avg_price*shares_float.outstandingShares)/cash_flow.freeCashFlow) as price_fcf_ratio,
- ((_50day._50day_avg_price*shares_float.outstandingShares)/cash_flow.operatingCashFlow) as price_ocf_ratio
+ ((_50day._50day_avg_price*shares_float.outstandingShares)/NULLIF(cash_flow.freeCashFlow,0)) as price_fcf_ratio,
+ ((_50day._50day_avg_price*shares_float.outstandingShares)/NULLIF(cash_flow.operatingCashFlow,0)) as price_ocf_ratio
  FROM cash_flow_rownum cash_flow
  LEFT JOIN cash_flow_statement_max
  ON cash_flow.symbol = cash_flow_statement_max.symbol
@@ -181,7 +185,7 @@ SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calen
  ON shares_float.symbol = cash_flow.symbol
  WHERE cash_flow.row_numb = cash_flow_statement_max.max_row_numb
  ;
-
+ SELECT 'sp_price_cashflow_completed';
  END //
  DELIMITER ;
 

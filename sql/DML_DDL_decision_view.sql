@@ -13,41 +13,44 @@ SHOW COLUMNS FROM mysql_portfolio._200_day_avg_price_info;
 SHOW COLUMNS FROM mysql_portfolio._5_year_avg_price_info;
 SHOW COLUMNS FROM mysql_portfolio.price_cashflow_info;
 
+drop  PROCEDURE mysql_portfolio.decision_view_info;
 
--- ------------------------------ PRICE TO CASH FLOW ANALYSIS ----------------------------------------------
-drop table mysql_portfolio.price_cashflow_info;
-create table  mysql_portfolio.price_cashflow_info as
-WITH cash_flow_rownum as
- (
-  SELECT *,row_number() over (partition by symbol order by calendarYear) as row_numb
-  FROM mysql_portfolio.cash_flow_statement
-  ),
-  cash_flow_statement_max as
-  (
-  SELECT symbol, max(row_numb) as max_row_numb FROM cash_flow_rownum group by 1
-  )
-SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calendarYear, cash_flow.freeCashFlow,cash_flow.operatingCashFlow,
- _50day._50day_avg_price, _50day.latest_price_date, shares_float.outstandingShares,
- (_50day._50day_avg_price*shares_float.outstandingShares) as outstanding_share_total_price,
- ((_50day._50day_avg_price*shares_float.outstandingShares)/cash_flow.freeCashFlow) as price_fcf_ratio,
- ((_50day._50day_avg_price*shares_float.outstandingShares)/cash_flow.operatingCashFlow) as price_ocf_ratio
- FROM cash_flow_rownum cash_flow
- LEFT JOIN cash_flow_statement_max
- ON cash_flow.symbol = cash_flow_statement_max.symbol
- LEFT JOIN mysql_portfolio._50_day_avg_price_info _50day
- ON cash_flow.symbol = _50day.symbol
- LEFT JOIN mysql_portfolio.shares_float
- ON shares_float.symbol = cash_flow.symbol
- WHERE cash_flow.row_numb = cash_flow_statement_max.max_row_numb
- ;
+-- ------------------------------ PRICE TO CASH FLOW ANALYSIS OLD----------------------------------------------
 
- SELECT * FROM mysql_portfolio.price_cashflow_info;
+-- drop table mysql_portfolio.price_cashflow_info;
+-- create table  mysql_portfolio.price_cashflow_info as
+-- WITH cash_flow_rownum as
+--  (
+--   SELECT *,row_number() over (partition by symbol order by calendarYear) as row_numb
+--   FROM mysql_portfolio.cash_flow_statement
+--   ),
+--   cash_flow_statement_max as
+--   (
+--   SELECT symbol, max(row_numb) as max_row_numb FROM cash_flow_rownum group by 1
+--   )
+-- SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calendarYear, cash_flow.freeCashFlow,cash_flow.operatingCashFlow,
+--  _50day._50day_avg_price, _50day.latest_price_date, shares_float.outstandingShares,
+--  (_50day._50day_avg_price*shares_float.outstandingShares) as outstanding_share_total_price,
+--  ((_50day._50day_avg_price*shares_float.outstandingShares)/cash_flow.freeCashFlow) as price_fcf_ratio,
+--  ((_50day._50day_avg_price*shares_float.outstandingShares)/cash_flow.operatingCashFlow) as price_ocf_ratio
+--  FROM cash_flow_rownum cash_flow
+--  LEFT JOIN cash_flow_statement_max
+--  ON cash_flow.symbol = cash_flow_statement_max.symbol
+--  LEFT JOIN mysql_portfolio._50_day_avg_price_info _50day
+--  ON cash_flow.symbol = _50day.symbol
+--  LEFT JOIN mysql_portfolio.shares_float
+--  ON shares_float.symbol = cash_flow.symbol
+--  WHERE cash_flow.row_numb = cash_flow_statement_max.max_row_numb
+--  ;
+
+ -- SELECT * FROM mysql_portfolio.price_cashflow_info;
 
  -- --------------------------- DECISION PARAMETER GATHERING view FILE ----------------------------
- DELIMITER //
+
+-- DROP VIEW mysql_portfolio.vw_stock_parameter_check;
+DELIMITER //
  CREATE PROCEDURE mysql_portfolio.decision_view_info()
  BEGIN
--- DROP VIEW mysql_portfolio.vw_stock_parameter_check;
 CREATE VIEW mysql_portfolio.vw_stock_parameter_check AS
 WITH key_metrics_rownum as
  (
@@ -107,6 +110,7 @@ SELECT DISTINCT
     AND pepb.symbol is not null order by symbol
   --   AND screener.symbol in ('AAPL','MSFT')
     ;
+    SELECT 'sp_decision_view_info_completed';
     END //
     DELIMITER ;
 
