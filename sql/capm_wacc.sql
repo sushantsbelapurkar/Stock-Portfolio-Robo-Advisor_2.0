@@ -12,10 +12,9 @@ WITH _rate_or_return as
  /(FIRST_VALUE(close) over(partition by symbol,year(date) order by date))*100 as ror,
  row_number() over (partition by symbol,year(date)) as row_numb,curdate() as created_at
   FROM mysql_portfolio.historical_prices
-  WHERE
-  symbol like 'U%' OR symbol like 'V%'
-  OR symbol like 'W%' OR symbol like 'X%'
-  OR symbol like 'Y%' OR symbol like 'Z%'
+  -- symbol like 'U%' OR symbol like 'V%'
+--   OR symbol like 'W%' OR symbol like 'X%'
+--   OR symbol like 'Y%' OR symbol like 'Z%'
   order by 1,3 desc
 
  -- WHERE symbol IN ('AAPL','MSFT') order by 1,3 desc
