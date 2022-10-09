@@ -1,3 +1,4 @@
+-- DROP PROCEDURE mysql_portfolio.golden_death_cross_info;
 DELIMITER //
 CREATE PROCEDURE mysql_portfolio.golden_death_cross_info()
 BEGIN
@@ -88,14 +89,16 @@ round(_200day._200day_avg_price+(_200day._200day_avg_price*0.1),2) as _10percent
 FROM mysql_portfolio._200_day_avg_price_info _200day
 LEFT JOIN mysql_portfolio._50_day_avg_price_info _50day
 ON _50day.symbol = _200day.symbol
+WHERE _200day._200day_avg_price != 0 AND _200day._200day_avg_price IS NOT NULL
 )
 SELECT _50_200_days.*,
 CASE
 WHEN (_50day_avg_price BETWEEN _10percentDownOf_200day AND _10percentUpOf_200day) THEN 'Y' ELSE 'N' END AS near_to_golden_death_cross,
 round((_200day_avg_price - _50day_avg_price),2) as price_difference,
-round(100-((_50day_avg_price*100)/_200day_avg_price),2) as percent_diff_in_50_200_price,
+round(100-((_50day_avg_price*100)/NULLIF(_200day_avg_price,0)),2) as percent_diff_in_50_200_price,
 'Check trading volume' as note
 FROM _50_200_days
+WHERE _200day_avg_price !=0 AND _200day_avg_price IS NOT NULL
 ;
 -- SELECT * FROM mysql_portfolio.golden_death_cross;
 SELECT 'sp_golden_death_cross_completed';
@@ -191,3 +194,4 @@ SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calen
 
  -- SELECT * FROM mysql_portfolio.price_cashflow_info;
 
+ 
