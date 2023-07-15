@@ -1,26 +1,8 @@
-CREATE TABLE mysql_portfolio.proc_exec_history
- (
- proc_name varchar(255) not null,
- executed_at timestamp not null
- );
-
 DELIMITER //
-CREATE PROCEDURE mysql_portfolio.drop_base_data()
+CREATE OR REPLACE PROCEDURE mysql_portfolio.drop_master_data()
 BEGIN
-DROP TABLE mysql_portfolio.symbol_list;
-DROP TABLE mysql_portfolio.balance_sheet;
-DROP TABLE mysql_portfolio.income_statement;
-DROP TABLE mysql_portfolio.cash_flow_statement;
-DROP TABLE mysql_portfolio.financial_growth;
-DROP TABLE mysql_portfolio.financial_ratios;
-DROP TABLE mysql_portfolio.key_metrics;
-DROP TABLE mysql_portfolio.sector_pe;
-DROP TABLE mysql_portfolio.industry_pe;
-DROP TABLE mysql_portfolio.stock_screener;
-DROP TABLE mysql_portfolio.historical_prices;
-DROP TABLE mysql_portfolio.shares_float;
-DROP TABLE mysql_portfolio.api_dcf;
-DROP TABLE mysql_portfolio.api_rating;
+
+-- -------------------- CALCULATION TABLES ----------------------------------
 drop table mysql_portfolio.eps_info;
 drop table mysql_portfolio.ebitda_info;
 drop table mysql_portfolio.netincome_info;
@@ -51,8 +33,6 @@ DROP TABLE mysql_portfolio.company_analysis;
 DROP TABLE mysql_portfolio.company_score;
 DROP TABLE mysql_portfolio.fair_price_analysis;
 
-
+SELECT 'sp_drop_master_tables_cleanup_completed';
 END //
 DELIMITER ;
-DROP PROCEDURE mysql_portfolio.drop_base_data;
-DROP TABLE mysql_portfolio.proc_exec_history;

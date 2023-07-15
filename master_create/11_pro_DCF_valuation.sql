@@ -1,27 +1,29 @@
--- METHOD 1 --> unlevered free cash flow  --> NOT USING CURRENTLY
-SELECT
-income_statement.symbol,income_statement.date,cost_of_debt.ebit,cost_of_debt.effective_tax_rate,income_statement.depreciationAndAmortization,
-cash_flow_statement.capitalExpenditure,(balance_sheet.totalCurrentAssets-balance_sheet.totalCurrentLiabilities)as workingCapital,
-(cost_of_debt.ebit*(1- effective_tax_rate)+income_statement.depreciationAndAmortization+
-cash_flow_statement.capitalExpenditure-(balance_sheet.totalCurrentAssets-balance_sheet.totalCurrentLiabilities))
-as free_cash_flow
-FROM mysql_portfolio.income_statement
-LEFT JOIN mysql_portfolio.cash_flow_statement
-ON cash_flow_statement.symbol = income_statement.symbol
-AND year(cash_flow_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cash_flow_statement)
-LEFT JOIN mysql_portfolio.cost_of_debt
-ON cost_of_debt.symbol = income_statement.symbol
-AND year(cost_of_debt.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cost_of_debt)
-LEFT JOIN mysql_portfolio.balance_sheet
-ON balance_sheet.symbol = income_statement.symbol
-AND year(balance_sheet.date) =  (SELECT MAX(year(date)) FROM mysql_portfolio.key_metrics)
-WHERE year(income_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.income_statement)
-;
+-- ---////////////METHOD 1 --> unlevered free cash flow  --> NOT USING CURRENTLY
 
+--SELECT
+--income_statement.symbol,income_statement.date,cost_of_debt.ebit,cost_of_debt.effective_tax_rate,income_statement.depreciationAndAmortization,
+--cash_flow_statement.capitalExpenditure,(balance_sheet.totalCurrentAssets-balance_sheet.totalCurrentLiabilities)as workingCapital,
+--(cost_of_debt.ebit*(1- effective_tax_rate)+income_statement.depreciationAndAmortization+
+--cash_flow_statement.capitalExpenditure-(balance_sheet.totalCurrentAssets-balance_sheet.totalCurrentLiabilities))
+--as free_cash_flow
+--FROM mysql_portfolio.income_statement
+--LEFT JOIN mysql_portfolio.cash_flow_statement
+--ON cash_flow_statement.symbol = income_statement.symbol
+--AND year(cash_flow_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cash_flow_statement)
+--LEFT JOIN mysql_portfolio.cost_of_debt
+--ON cost_of_debt.symbol = income_statement.symbol
+--AND year(cost_of_debt.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cost_of_debt)
+--LEFT JOIN mysql_portfolio.balance_sheet
+--ON balance_sheet.symbol = income_statement.symbol
+--AND year(balance_sheet.date) =  (SELECT MAX(year(date)) FROM mysql_portfolio.key_metrics)
+--WHERE year(income_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.income_statement)
+--;
+--
+DROP PROCEDURE IF EXISTS mysql_portfolio.dcf_info;
 DELIMITER //
 CREATE PROCEDURE mysql_portfolio.dcf_info()
 BEGIN
--- DROP TABLE mysql_portfolio.gdp_data;
+ DROP TABLE IF EXISTS mysql_portfolio.gdp_data;
  CREATE TABLE mysql_portfolio.gdp_data
  (
    country varchar(20),
@@ -29,14 +31,14 @@ BEGIN
    gdp float(4,2)
  );
 
- INSERT INTO mysql_portfolio.gdp_data VALUES ('USA', 2021, 2.4);
- INSERT INTO mysql_portfolio.gdp_data VALUES ('India', 2021, 5.4);
---  SELECT * FROM mysql_portfolio.gdp_data;
+ INSERT INTO mysql_portfolio.gdp_data VALUES ('USA', 2023, 1.5);
+ INSERT INTO mysql_portfolio.gdp_data VALUES ('India', 2021, 5.5);
 
--- METHOD 2 --> MOSTLY USED SIMPLE FREE CASHFLOW METHOD --> USING NOW
+
+-- ------///////////////METHOD 2 --> MOSTLY USED SIMPLE FREE CASHFLOW METHOD --> USING NOW
 -- SOURCE = https://www.youtube.com/watch?v=fd_emLLzJnk&t=645s
 -- CONSIDERING PERPETUALL GROWTH RATE = 3.2% OR 0.032 : source: https://macabacus.com/valuation/dcf/terminal-value
--- DROP TABLE mysql_portfolio.progressive_free_cashflow;
+ DROP TABLE IF EXISTS mysql_portfolio.progressive_free_cashflow;
 CREATE TABLE mysql_portfolio.progressive_free_cashflow as
 SELECT terminal.*,wacc_data.wacc,
 -- CASE
@@ -79,7 +81,7 @@ ON wacc_data.symbol = terminal.symbol
 ;
 -- SELECT * FROM mysql_portfolio.progressive_free_cashflow;
 
--- DROP TABLE mysql_portfolio.dcf_data;
+DROP TABLE IF EXISTS mysql_portfolio.dcf_data;
 CREATE TABLE mysql_portfolio.dcf_data as
 SELECT dcf.*,shares_float.outstandingShares, (todays_value/shares_float.outstandingShares) as dcf_fair_value FROM
 (
@@ -98,9 +100,10 @@ ON  shares_float.symbol = dcf.symbol
 -- AND year(shares_float.date) = (SELECT MAX(year(shares_float.date)) FROM mysql_portfolio.shares_float)
 ;
 
+SELECT COUNT(*) FROM mysql_portfolio.dcf_data;
 END //
 DELIMITER ;
-SELECT * FROM mysql_portfolio.dcf_data;
+
 
 
 -- SELECT 56118000000*(1+(12.2/100.00));

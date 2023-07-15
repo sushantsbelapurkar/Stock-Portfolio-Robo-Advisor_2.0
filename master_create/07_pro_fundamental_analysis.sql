@@ -1,10 +1,13 @@
   -- REMEMBER TO ADD/CHECK SHAREHOLDING PATTERN IN FUNDAMENTALS
+  DROP PROCEDURE IF EXISTS mysql_portfolio.fundamental_analysis_info;
   DELIMITER //
-  CREATE PROCEDURE mysql_portfolio.fundamental_analysis_info()
+  CREATE PROCEDURE mysql_portfolio.fundamental_analysis_info(
+  IN exchangeName varchar(255)
+  )
   BEGIN
--- DROP TABLE mysql_portfolio.fundamental_analysis;
+   DROP TABLE IF EXISTS mysql_portfolio.fundamental_analysis;
    CREATE TABLE mysql_portfolio.fundamental_analysis AS
-   SELECT symbol,industry,sector,calendarYear,positive_eps_growth_3yrs,recent_eps_growth,debtToEquity,currentRatio,inventoryTurnover,
+   SELECT vw_param_chk.symbol,industry,sector,calendarYear,positive_eps_growth_3yrs,recent_eps_growth,debtToEquity,currentRatio,inventoryTurnover,
    roe,roic,
    CASE
    WHEN positive_eps_growth_3yrs = 1 AND recent_eps_growth = 1 THEN 'strong'
@@ -42,14 +45,13 @@
    WHEN roic*100 > 25 THEN 'strong'
    WHEN (roic*100 >=15 AND roic < 25)  THEN 'good'
    WHEN roic*100 < 15 THEN 'risky'
-   WHEN roic is null THEN 'data_na'END as roic_analysis
-FROM mysql_portfolio.vw_stock_parameter_check;
+   WHEN roic is null THEN 'data_na'END as roic_analysis,
+   curdate() created_at
+FROM mysql_portfolio.vw_stock_parameter_check vw_param_chk
+INNER JOIN mysql_portfolio.symbol_list
+ on symbol_list.symbol = vw_param_chk.symbol
+and symbol_list.exchangeShortName = exchangeName;
 
+SELECT count(*) from mysql_portfolio.fundamental_analysis;
 END //
 DELIMITER ;
-
-SELECT * FROM mysql_portfolio.vw_stock_parameter_check;
-
-SELECT * FROM mysql_portfolio.fundamental_analysis;
-
-  -- REMEMBER TO ADD/CHECK SHAREHOLDING PATTERN IN FUNDAMENTALS

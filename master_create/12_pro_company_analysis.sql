@@ -1,7 +1,11 @@
+
+-- CALL mysql_portfolio.company_analysis_score_info('NSE');
+ DROP PROCEDURE IF EXISTS mysql_portfolio.company_analysis_score_info;
  DELIMITER //
- CREATE PROCEDURE mysql_portfolio.company_analysis_score_info()
+ CREATE PROCEDURE mysql_portfolio.company_analysis_score_info(
+ IN exchangeName varchar(255))
  BEGIN
- -- DROP TABLE mysql_portfolio.company_analysis;
+ DROP TABLE IF EXISTS mysql_portfolio.company_analysis;
  CREATE TABLE mysql_portfolio.company_analysis AS
  SELECT fundamental.symbol,fundamental.calendarYear,fundamental.eps_growth_analysis,fundamental.debt_to_equity_analysis,
  fundamental.current_ratio_analysis,fundamental.inventory_analysis,fundamental.roe_analysis,fundamental.roic_analysis,
@@ -11,6 +15,9 @@
  growth.operating_cash_flow_growth,growth.divident_growth,growth.rdexpense_growth,growth.capex_growth_ofc,growth.capex_growth_revenue,
  growth.is_roic_greater_wacc
  FROM mysql_portfolio.fundamental_analysis fundamental
+ INNER JOIN mysql_portfolio.symbol_list
+ on symbol_list.symbol = fundamental.symbol
+ and symbol_list.exchangeShortName = exchangeName
  LEFT JOIN mysql_portfolio.value_analysis value
  ON value.symbol = fundamental.symbol
  LEFT JOIN mysql_portfolio.growth_analysis growth
@@ -18,7 +25,7 @@
 
  -- SELECT * FROM mysql_portfolio.company_analysis;
 
- -- DROP TABLE mysql_portfolio.company_score;
+ DROP TABLE IF EXISTS mysql_portfolio.company_score;
  CREATE TABLE mysql_portfolio.company_score AS
  WITH param_score AS
  (
@@ -143,25 +150,38 @@
  ELSE 0
  END AS roic_wacc_score
  FROM mysql_portfolio.company_analysis comp
+ INNER JOIN mysql_portfolio.symbol_list
+ on symbol_list.symbol = comp.symbol
+ and symbol_list.exchangeShortName = exchangeName
  ),
- fundamenta_score AS
+ fundamental_score AS
  (
-  SELECT symbol,
+  SELECT param_score.symbol,
   (eps_growth_score+debt_to_equity_score+current_ratio_score+roe_score+roic_score+pe_ratio_score+pb_ratio_score+pepb_ratio_score) as fundamental_score
   FROM param_score
+  INNER JOIN mysql_portfolio.symbol_list
+  on symbol_list.symbol = param_score.symbol
+  and symbol_list.exchangeShortName = exchangeName
   ),
   growth_score AS
   (
-	SELECT symbol,
+	SELECT param_score.symbol,
     (ebitda_growth_score+netincome_growth_score+sales_growth_score+roe_growth_score+shareholder_equity_growth_score+operating_cash_flow_growth_score
     +divident_growth_score+rdexpense_growth_score+capex_growth_ofc_score+capex_growth_revenue_score) as growth_score
     FROM param_score
+    INNER JOIN mysql_portfolio.symbol_list
+    on symbol_list.symbol = param_score.symbol
+   and symbol_list.exchangeShortName = exchangeName
   ),
   main_param_score AS
   (
-    SELECT symbol,
+    SELECT param_score.symbol,
     (eps_growth_score+debt_to_equity_score+current_ratio_score+roe_score+pepb_ratio_score+ebitda_growth_score+sales_growth_score+roe_growth_score+
-    roic_wacc_score) AS main_score FROM param_score
+    roic_wacc_score) AS main_score
+    FROM param_score
+    INNER JOIN mysql_portfolio.symbol_list
+    on symbol_list.symbol = param_score.symbol
+   and symbol_list.exchangeShortName = exchangeName
   ),
     total_score AS
     (
@@ -170,7 +190,10 @@
      (fun.fundamental_score+gr.growth_score+param.inventory_score+param.pe_vs_sector_pe_score+param.price_ocf_score+param.price_to_sales_score
      +param.roic_wacc_score) as total_score
      FROM param_score param
-     LEFT JOIN fundamenta_score fun ON fun.symbol = param.symbol
+     INNER JOIN mysql_portfolio.symbol_list
+     on symbol_list.symbol = param.symbol
+     and symbol_list.exchangeShortName = exchangeName
+     LEFT JOIN fundamental_score fun ON fun.symbol = param.symbol
      LEFT JOIN growth_score gr ON gr.symbol = param.symbol
      LEFT JOIN main_param_score main ON main.symbol = param.symbol
      ),
@@ -197,15 +220,18 @@
      WHEN gr.growth_score >=121 AND gr.growth_score <146  THEN 'border_level'
      WHEN gr.growth_score >=88 AND gr.growth_score <121  THEN 'risky'
      ELSE 'weak' END AS overall_signal,
-     param.roic_wacc_score,param.inventory_score,
-     api_rating.rating as api_rating, api_rating.ratingScore as api_score
+     param.roic_wacc_score,param.inventory_score
+     -- api_rating.rating as api_rating, api_rating.ratingScore as api_score
      FROM param_score param
-     LEFT JOIN fundamenta_score fun ON fun.symbol = param.symbol
+     INNER JOIN mysql_portfolio.symbol_list
+     on symbol_list.symbol = param.symbol
+     and symbol_list.exchangeShortName = exchangeName
+     LEFT JOIN fundamental_score fun ON fun.symbol = param.symbol
      LEFT JOIN growth_score gr ON gr.symbol = param.symbol
      LEFT JOIN main_param_score main ON main.symbol = param.symbol
      LEFT JOIN total_score total ON total.symbol = param.symbol
-     LEFT JOIN mysql_portfolio.api_rating
-     ON api_rating.symbol = param.symbol
+     -- LEFT JOIN mysql_portfolio.api_rating
+--      ON api_rating.symbol = param.symbol
      )
      SELECT * from all_score;
 
@@ -214,7 +240,7 @@
 --  DROP TABLE mysql_portfolio.stock_peer;
 --  SELECT * FROM mysql_portfolio.api_rating;
 
--- DROP TABLE mysql_portfolio.fair_price_analysis;
+DROP TABLE IF EXISTS mysql_portfolio.fair_price_analysis;
 CREATE TABLE mysql_portfolio.fair_price_analysis AS
 WITH fair_price AS
 (
@@ -224,6 +250,9 @@ round(dcf_data.dcf_fair_value,2) as dcf_fair_value,
 round(api_dcf.dcf,2) as api_dcf_value,
 price.latest_price_date,price.latest_close_price, price._50day_avg_price
  FROM mysql_portfolio.eps_info
+ INNER JOIN mysql_portfolio.symbol_list
+ on symbol_list.symbol = eps_info.symbol
+ and symbol_list.exchangeShortName = exchangeName
  LEFT JOIN mysql_portfolio.key_metrics
  ON key_metrics.symbol = eps_info.symbol
  AND year(key_metrics.date) = eps_info.calendarYear
@@ -246,19 +275,10 @@ CASE
 WHEN latest_close_price <= dcf_fair_value THEN 'undervalued'
 ELSE 'overvalued' END AS latest_price_compared_to_dcf
 FROM fair_price
+INNER JOIN mysql_portfolio.symbol_list
+on symbol_list.symbol = fair_price.symbol
+and symbol_list.exchangeShortName = exchangeName
  ;
+ SELECT COUNT(*) mysql_portfolio.fair_price_analysis;
  END //
  DELIMITER ;
-
- SELECT * FROM mysql_portfolio.fair_price_analysis;
-
-SELECT * FROM mysql_portfolio.dcf_values;
-SELECT * FROM mysql_portfolio._50_day_avg_price_info;
- SELECT * FROM mysql_portfolio.eps_info;
-  SELECT * FROM mysql_portfolio.dcf_data;
-SELECT * FROM mysql_portfolio.key_metrics;
- SELECT * FROM mysql_portfolio.pe_pb_ratio_info;
- SELECT * FROM mysql_portfolio.price_cashflow_info;
- SELECT * FROM mysql_portfolio.fundamental_analysis;
-SELECT * FROM mysql_portfolio.value_analysis;
-SELECT * FROM mysql_portfolio. growth_analysis;
