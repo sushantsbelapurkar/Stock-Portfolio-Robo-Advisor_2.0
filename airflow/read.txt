@@ -1,1 +1,0 @@
-Contains airlow scheduler for myportfolio pro project
