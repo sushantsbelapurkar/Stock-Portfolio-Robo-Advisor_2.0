@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Black">
-    <option name="pathToExecutable" value="$PROJECT_DIR$/../anaconda3/bin/black" />
-    <option name="sdkUUID" value="521068b2-5dec-4f42-92a9-558120e9573f" />
-  </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (airflow-venv)" project-jdk-type="Python SDK" />
-</project>
