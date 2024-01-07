@@ -1,5 +1,5 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.price_cah_flow_info;
-DELIMITER //
+
 CREATE PROCEDURE mysql_portfolio.price_cah_flow_info(
 IN exchangeName varchar(255)
 )
@@ -37,5 +37,4 @@ and symbol_list.exchangeShortName = exchangeName
  WHERE cash_flow.row_numb = cash_flow_statement_max.max_row_numb
  ;
  SELECT count(*) from mysql_portfolio.price_cashflow_info;
- END //
- DELIMITER ;
+ END ;

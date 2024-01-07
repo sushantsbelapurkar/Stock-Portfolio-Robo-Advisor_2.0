@@ -1,5 +1,5 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.capm_wacc_info;
-DELIMITER //
+
  CREATE PROCEDURE mysql_portfolio.capm_wacc_tmp(
  IN exchangeName varchar(20))
  BEGIN
@@ -305,5 +305,4 @@ ON cost_of_debt.symbol = debt_to_equity_ratio.symbol
 ;
 SELECT COUNT(*) FROM mysql_portfolio.wacc_data;
 
-   END //
-   DELIMITER ;
+   END ;

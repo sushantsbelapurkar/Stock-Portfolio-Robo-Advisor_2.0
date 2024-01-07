@@ -1,6 +1,6 @@
 -- --------------------------------- ebitda CAGR -----------------------------
 DROP PROCEDURE IF EXISTS mysql_portfolio.cagr_info;
- DELIMITER //
+
 CREATE PROCEDURE mysql_portfolio.cagr_info(
 IN exchangeName varchar(255)
 ) 
@@ -395,5 +395,5 @@ THEN
  ;
 
  SELECT count(*) FROM mysql_portfolio.free_cash_flow_info;
-END //
-DELIMITER ;
+END ;
+

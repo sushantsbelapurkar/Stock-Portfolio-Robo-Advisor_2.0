@@ -1,5 +1,5 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.decision_view_info;
-DELIMITER //
+
 CREATE PROCEDURE mysql_portfolio.decision_view_info()
 BEGIN
 DROP VIEW IF EXISTS mysql_portfolio.vw_stock_parameter_check;
@@ -72,5 +72,5 @@ SELECT DISTINCT
   --   AND screener.symbol in ('AAPL','MSFT')
     ;
     SELECT count(*) from mysql_portfolio.vw_stock_parameter_check;
-    END //
-    DELIMITER ;
+    END  ;
+

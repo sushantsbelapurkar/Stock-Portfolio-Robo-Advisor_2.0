@@ -1,7 +1,7 @@
 
 -- CALL mysql_portfolio.company_analysis_score_info('NSE');
  DROP PROCEDURE IF EXISTS mysql_portfolio.company_analysis_score_info;
- DELIMITER //
+
  CREATE PROCEDURE mysql_portfolio.company_analysis_score_info(
  IN exchangeName varchar(255))
  BEGIN
@@ -279,6 +279,5 @@ INNER JOIN mysql_portfolio.symbol_list
 on symbol_list.symbol = fair_price.symbol
 and symbol_list.exchangeShortName = exchangeName
  ;
- SELECT COUNT(*) mysql_portfolio.fair_price_analysis;
- END //
- DELIMITER ;
+ END  ;
+

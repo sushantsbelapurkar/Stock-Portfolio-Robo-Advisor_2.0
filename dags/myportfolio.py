@@ -1,9 +1,7 @@
 import datetime
 
 from airflow import DAG
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.mysql.operators.mysql import MySqlOperator
-from airflow.utils.dates import days_ago
 
 args = {
     "owner": "Sushant",
@@ -26,22 +24,94 @@ dag = DAG(
 task_pro_eps_info = MySqlOperator(
     task_id="pro_eps_info",
     dag=dag,
-    sql="master_setup/01_pro_eps_info.sql",
-    mysql_conn_id='mysql_conn_id'
+    sql="mysql_portfolio/master_setup/01_pro_eps_info.sql",
+    mysql_conn_id='mysql_localhost'
 )
 
 task_pro_carg_info = MySqlOperator(
     task_id="pro_carg_info",
     dag=dag,
-    sql="master_setup/02_pro_carg_info.sql",
-    mysql_conn_id='mysql_conn_id'
+    sql="mysql_portfolio/master_setup/02_pro_carg_info.sql",
+    mysql_conn_id='mysql_localhost'
 )
 
-task_pro_carg_info = MySqlOperator(
-    task_id="pro_carg_info",
+task_pro_golden_death_cross = MySqlOperator(
+    task_id="pro_golden_death_cross",
     dag=dag,
-    sql="master_setup/02_pro_carg_info.sql",
-    mysql_conn_id='mysql_conn_id'
+    sql="mysql_portfolio/master_setup/03_pro_golden_death_cross.sql",
+    mysql_conn_id='mysql_localhost'
 )
 
-task_pro_eps_info >> task_pro_carg_info
+task_pro_pe_pb_analysis = MySqlOperator(
+    task_id="pro_pe_pb_analysis",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/04_pro_pe_pb_analysis.sql",
+    mysql_conn_id='mysql_localhost'
+
+)
+
+task_pro_price_to_cashflow_analysis = MySqlOperator(
+    task_id="pro_price_to_cashflow_analysis",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/05_pro_price_to_cashflow_analysis.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_decision_view = MySqlOperator(
+    task_id="pro_decision_view",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/06_pro_decision_view.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_fundamental_analysis = MySqlOperator(
+    task_id="pro_fundamental_analysis",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/07_pro_fundamental_analysis.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+pro_value_analysis = MySqlOperator(
+    task_id="pro_value_analysis",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/08_pro_value_analysis.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_growth_analysis = MySqlOperator(
+    task_id="pro_growth_analysis",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/09_pro_growth_analysis.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_capm_wacc_calc = MySqlOperator(
+    task_id="pro_capm_wacc_calc",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/10_pro_capm_wacc_calc.sql",
+    mysql_conn_id='mysql_localhost'
+
+)
+
+task_pro_DCF_valuation = MySqlOperator(
+    task_id="pro_DCF_valuation",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/11_pro_DCF_valuation.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_company_analysis = MySqlOperator(
+    task_id="pro_company_analysis",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/12_pro_company_analysis.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_sequential_proc_run = MySqlOperator(
+    task_id="pro_sequential_proc_run",
+    dag=dag,
+    sql="mysql_portfolio/master_setup/13_pro_sequential_proc_run.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_eps_info >> task_pro_carg_info >> task_pro_golden_death_cross >> task_pro_pe_pb_analysis >> task_pro_price_to_cashflow_analysis >> task_pro_decision_view >> task_pro_fundamental_analysis >> pro_value_analysis >> task_pro_growth_analysis >> task_pro_capm_wacc_calc >> task_pro_DCF_valuation >> task_pro_company_analysis >> task_pro_sequential_proc_run

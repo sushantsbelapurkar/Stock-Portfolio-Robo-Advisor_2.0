@@ -1,6 +1,6 @@
   -- REMEMBER TO ADD/CHECK SHAREHOLDING PATTERN IN FUNDAMENTALS
   DROP PROCEDURE IF EXISTS mysql_portfolio.fundamental_analysis_info;
-  DELIMITER //
+
   CREATE PROCEDURE mysql_portfolio.fundamental_analysis_info(
   IN exchangeName varchar(255)
   )
@@ -53,5 +53,4 @@ INNER JOIN mysql_portfolio.symbol_list
 and symbol_list.exchangeShortName = exchangeName;
 
 SELECT count(*) from mysql_portfolio.fundamental_analysis;
-END //
-DELIMITER ;
+END  ;

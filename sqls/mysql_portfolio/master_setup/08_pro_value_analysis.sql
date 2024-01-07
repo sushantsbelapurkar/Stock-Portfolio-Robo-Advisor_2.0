@@ -1,5 +1,5 @@
  DROP PROCEDURE IF EXISTS mysql_portfolio.value_analysis_info;
- DELIMITER //
+
   CREATE PROCEDURE mysql_portfolio.value_analysis_info()
   BEGIN
    DROP TABLE IF EXISTS mysql_portfolio.value_analysis;
@@ -37,6 +37,5 @@
    CURDATE() as created_at
    FROM mysql_portfolio.vw_stock_parameter_check;
 
-   END //
-   DELIMITER ;
-   SELECT COUNT(*) FROM mysql_portfolio.value_analysis;
+   END ;
+

@@ -1,5 +1,5 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.growth_analysis_info;
-DELIMITER //
+
   CREATE PROCEDURE mysql_portfolio.growth_analysis_info(
   IN exchangeName varchar(255)
   )
@@ -97,6 +97,6 @@ DELIMITER //
    AND YEAR(wacc_data.date) = stock_param.calendarYear
    ;
    SELECT count(*) FROM mysql_portfolio.growth_analysis;
-   END //
-   DELIMITER ;
+   END ;
+
 

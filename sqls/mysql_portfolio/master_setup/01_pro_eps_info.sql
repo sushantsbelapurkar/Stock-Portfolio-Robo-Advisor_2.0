@@ -1,6 +1,6 @@
 -- ---------- eps calculation for last 5 years--------------------
 DROP PROCEDURE IF EXISTS mysql_portfolio.eps_info;
-DELIMITER //
+
 CREATE PROCEDURE mysql_portfolio.eps_info (
 IN exchangeName varchar(255)
 ) 
@@ -40,5 +40,4 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
  WHERE eps_details.row_numb = max_row.max_row_numb order by 1,2
  ;
  SELECT count(*) from mysql_portfolio.eps_info;
- END //
- DELIMITER ; 
+ END ;

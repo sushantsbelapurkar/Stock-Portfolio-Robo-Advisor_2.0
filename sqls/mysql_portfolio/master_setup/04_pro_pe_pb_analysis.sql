@@ -1,5 +1,5 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.pepb_info;
-DELIMITER //
+
 CREATE PROCEDURE mysql_portfolio.pepb_info(
 IN exchangeName varchar(255)
 )
@@ -49,5 +49,4 @@ and symbol_list.exchangeShortName = exchangeName
  LEFT JOIN key_metrics_maxyr
  ON eps.symbol = key_metrics_maxyr.symbol;
  SELECT count(*) from mysql_portfolio.pe_pb_ratio_info;
- END //
-DELIMITER ;
+ END ;

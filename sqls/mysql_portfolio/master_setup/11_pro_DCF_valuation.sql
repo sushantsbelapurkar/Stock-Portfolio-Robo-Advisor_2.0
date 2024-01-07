@@ -1,26 +1,5 @@
--- ---////////////METHOD 1 --> unlevered free cash flow  --> NOT USING CURRENTLY
-
---SELECT
---income_statement.symbol,income_statement.date,cost_of_debt.ebit,cost_of_debt.effective_tax_rate,income_statement.depreciationAndAmortization,
---cash_flow_statement.capitalExpenditure,(balance_sheet.totalCurrentAssets-balance_sheet.totalCurrentLiabilities)as workingCapital,
---(cost_of_debt.ebit*(1- effective_tax_rate)+income_statement.depreciationAndAmortization+
---cash_flow_statement.capitalExpenditure-(balance_sheet.totalCurrentAssets-balance_sheet.totalCurrentLiabilities))
---as free_cash_flow
---FROM mysql_portfolio.income_statement
---LEFT JOIN mysql_portfolio.cash_flow_statement
---ON cash_flow_statement.symbol = income_statement.symbol
---AND year(cash_flow_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cash_flow_statement)
---LEFT JOIN mysql_portfolio.cost_of_debt
---ON cost_of_debt.symbol = income_statement.symbol
---AND year(cost_of_debt.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cost_of_debt)
---LEFT JOIN mysql_portfolio.balance_sheet
---ON balance_sheet.symbol = income_statement.symbol
---AND year(balance_sheet.date) =  (SELECT MAX(year(date)) FROM mysql_portfolio.key_metrics)
---WHERE year(income_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.income_statement)
---;
---
 DROP PROCEDURE IF EXISTS mysql_portfolio.dcf_info;
-DELIMITER //
+
 CREATE PROCEDURE mysql_portfolio.dcf_info()
 BEGIN
  DROP TABLE IF EXISTS mysql_portfolio.gdp_data;
@@ -101,14 +80,8 @@ ON  shares_float.symbol = dcf.symbol
 ;
 
 SELECT COUNT(*) FROM mysql_portfolio.dcf_data;
-END //
-DELIMITER ;
+END ;
 
 
-
--- SELECT 56118000000*(1+(12.2/100.00));
--- SELECT freeCashFlow from mysql_portfolio.cash_flow_statement where symbol = 'AAPL' AND year(date)= 2018;
--- SELECT ebitda from mysql_portfolio.income_statement where symbol = 'AAPL' AND year(date)= 2017;
---
 
 

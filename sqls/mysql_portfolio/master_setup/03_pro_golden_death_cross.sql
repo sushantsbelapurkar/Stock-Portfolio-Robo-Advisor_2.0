@@ -1,5 +1,4 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.golden_death_cross_info;
-DELIMITER //
 CREATE PROCEDURE mysql_portfolio.golden_death_cross_info(
 IN exchangeName varchar(255)
 )
@@ -114,5 +113,5 @@ WHERE _200day_avg_price !=0 AND _200day_avg_price IS NOT NULL
 ;
 -- SELECT * FROM mysql_portfolio.golden_death_cross;
 SELECT count(*) from mysql_portfolio.golden_death_cross;
-END //
-DELIMITER ;
+END  ;
+
