@@ -78,3 +78,4 @@ INSERT INTO mysql_portfolio.proc_exec_history VALUES ('company_analysis_score_in
     END WHILE;
 END  ;
 
+CALL exchange_proc_loop();
