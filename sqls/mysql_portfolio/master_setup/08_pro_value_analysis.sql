@@ -1,11 +1,14 @@
  DROP PROCEDURE IF EXISTS mysql_portfolio.value_analysis_info;
 
-  CREATE PROCEDURE mysql_portfolio.value_analysis_info()
+  CREATE PROCEDURE mysql_portfolio.value_analysis_info(
+  IN exchangeName varchar(255)
+  )
   BEGIN
    DROP TABLE IF EXISTS mysql_portfolio.value_analysis;
    CREATE TABLE mysql_portfolio.value_analysis AS
-   SELECT symbol,latest_price_date, latest_close_price,_50day_avg_price,_200day_avg_price,_5yr_avg_price,final_pe_ratio,live_peratio,
-   pbratio,live_pbratio,ratio_pe_into_pb,price_fcf_ratio,price_ocf_ratio,priceToSalesRatio,
+   SELECT stock_param.symbol,stock_param.latest_price_date, stock_param.latest_close_price,stock_param._50day_avg_price,stock_param._200day_avg_price,stock_param._5yr_avg_price,
+   stock_param.final_pe_ratio,stock_param.live_peratio,
+   stock_param.pbratio,stock_param.live_pbratio,stock_param.ratio_pe_into_pb,stock_param.price_fcf_ratio,stock_param.price_ocf_ratio,stock_param.priceToSalesRatio,
    CASE
    WHEN final_pe_ratio <=15 THEN 'undervalued'
    WHEN (final_pe_ratio >15 AND final_pe_ratio <= 25) THEN 'considerable'
@@ -35,7 +38,11 @@
    WHEN price_ocf_ratio > 15 THEN 'overvalued'
    WHEN price_ocf_ratio IS NULL THEN 'data_na' END AS price_ocf_analysis,
    CURDATE() as created_at
-   FROM mysql_portfolio.vw_stock_parameter_check;
+   FROM mysql_portfolio.vw_stock_parameter_check stock_param
+   INNER JOIN mysql_portfolio.symbol_list
+   on symbol_list.symbol = stock_param.symbol
+   and symbol_list.exchangeShortName = exchangeName
+  ;
 
    END ;
 

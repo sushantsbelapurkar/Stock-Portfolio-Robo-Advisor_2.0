@@ -1,6 +1,8 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.dcf_info;
 
-CREATE PROCEDURE mysql_portfolio.dcf_info()
+CREATE PROCEDURE mysql_portfolio.dcf_info(
+IN exchangeName varchar(255)
+)
 BEGIN
  DROP TABLE IF EXISTS mysql_portfolio.gdp_data;
  CREATE TABLE mysql_portfolio.gdp_data
@@ -20,21 +22,6 @@ BEGIN
  DROP TABLE IF EXISTS mysql_portfolio.progressive_free_cashflow;
 CREATE TABLE mysql_portfolio.progressive_free_cashflow as
 SELECT terminal.*,wacc_data.wacc,
--- CASE
--- WHEN exchangeShortName = 'NASDAQ'
--- THEN
--- ROUND((yr5_prog_fcf*(1+(SELECT (gdp/100.00) FROM mysql_portfolio.gdp_data where country = 'USA')))/
--- ((wacc_data.wacc/100.00) - (SELECT (gdp/100.00) FROM mysql_portfolio.gdp_data where country = 'USA')),2)
--- WHEN exchangeShortName = 'NYSE'
--- THEN
--- ROUND((yr5_prog_fcf*(1+(SELECT (gdp/100.00) FROM mysql_portfolio.gdp_data where country = 'USA')))/
--- ((wacc_data.wacc/100.00) - (SELECT (gdp/100.00) FROM mysql_portfolio.gdp_data where country = 'USA')),2)
--- WHEN exchangeShortName = 'NSE'
--- THEN
--- ROUND((yr5_prog_fcf*(1+(SELECT (gdp/100.00) FROM mysql_portfolio.gdp_data where country = 'India')))/
--- ((wacc_data.wacc/100.00) - (SELECT (gdp/100.00) FROM mysql_portfolio.gdp_data where country = 'India')),2)
--- END
---  as terminal_value
 ROUND (((yr5_prog_fcf*(1+0.032))/
 ((wacc_data.wacc/100.00) - 0.032)),2) AS terminal_value FROM
 (
@@ -45,12 +32,16 @@ SELECT *, round((yr1_prog_fcf*(1+(fcf_cagr/100))),2) as yr2_prog_fcf FROM (
 SELECT DISTINCT cash_flow_statement.symbol,stock_screener.exchangeShortName,
 year(cash_flow_statement.date) as calendarYear,cash_flow_statement.freeCashFlow as current_fcf,free_cash_flow_info.fcf_cagr,
 round(cash_flow_statement.freeCashFlow*(1+(free_cash_flow_info.fcf_cagr/100.00)),2) as yr1_prog_fcf
-FROM mysql_portfolio.free_cash_flow_info
+FROM  mysql_portfolio.symbol_list
+INNER JOIN mysql_portfolio.free_cash_flow_info
+ON symbol_list.symbol = free_cash_flow_info.symbol
+AND symbol_list.exchangeShortName = exchangeName
 LEFT JOIN mysql_portfolio.cash_flow_statement
 ON free_cash_flow_info.symbol = cash_flow_statement.symbol
 AND free_cash_flow_info.calendarYear =  cash_flow_statement.calendarYear
 LEFT JOIN mysql_portfolio.stock_screener
 ON stock_screener.symbol = cash_flow_statement.symbol
+
 -- WHERE cash_flow_statement.date) = (SELECT MAX(year(date)) FROM mysql_portfolio.cash_flow_statement)
 )a)b)c)d
 )terminal

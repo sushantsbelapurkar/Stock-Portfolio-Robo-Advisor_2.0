@@ -1,8 +1,9 @@
-DROP PROCEDURE IF EXISTS mysql_portfolio.capm_wacc_info;
+DROP PROCEDURE IF EXISTS mysql_portfolio.capm_wacc_tmp;
 
  CREATE PROCEDURE mysql_portfolio.capm_wacc_tmp(
  IN exchangeName varchar(20))
- BEGIN
+
+BEGIN
 
      DECLARE i INT;
      DECLARE curr_yr varchar(20);
@@ -27,7 +28,7 @@ DROP PROCEDURE IF EXISTS mysql_portfolio.capm_wacc_info;
        -- LAST_VALUE(close) over(partition by symbol,year(date) order by date),
       -- FIRST_VALUE(close) over(partition by symbol,year(date) order by date),
        (LAST_VALUE(hp.close) over(partition by hp.symbol,year(hp.date) order by hp.date)- FIRST_VALUE(hp.close) over(partition by hp.symbol,year(hp.date) order by hp.date))
-       /(FIRST_VALUE(hp.close) over(partition by hp.symbol,year(hp.date) order by hp.date))*100 as ror,
+       /NULLIF(FIRST_VALUE(hp.close) OVER (PARTITION BY hp.symbol, YEAR(hp.date) ORDER BY hp.date), 0)*100 as ror,
        row_number() over (partition by hp.symbol,year(hp.date)) as row_numb,curdate() as created_at
         FROM mysql_portfolio.historical_prices hp
         INNER JOIN mysql_portfolio.symbol_list
@@ -277,13 +278,32 @@ balance_sheet_maxyr AS
 -- )
 debt_to_equity AS
 (
-SELECT symbol,date,((shortTermDebt+longTermDebt)/(shortTermDebt+longTermDebt+totalStockholdersEquity)) as debt_to_capitalization,
-((totalAssets - totalLiabilities)/(longTermDebt + totalStockholdersEquity)) as equity_to_capitalization
-FROM balance_sheet_maxyr
+SELECT
+    symbol,
+    date,
+    CASE
+        WHEN (shortTermDebt + longTermDebt) = 0 THEN NULL
+        ELSE ((shortTermDebt + longTermDebt) / NULLIF((shortTermDebt + longTermDebt + totalStockholdersEquity), 0))
+    END AS debt_to_capitalization,
+    CASE
+        WHEN (longTermDebt + totalStockholdersEquity) = 0 THEN NULL
+        ELSE ((totalAssets - totalLiabilities) / NULLIF((longTermDebt + totalStockholdersEquity), 0))
+    END AS equity_to_capitalization
+FROM
+    balance_sheet_maxyr
 )
-SELECT symbol,date,debt_to_capitalization,equity_to_capitalization,
-round((debt_to_capitalization/equity_to_capitalization),2) as debt_to_equity_ratio
-FROM debt_to_equity;
+SELECT
+    symbol,
+    date,
+    debt_to_capitalization,
+    equity_to_capitalization,
+    CASE
+        WHEN equity_to_capitalization = 0 THEN NULL
+        ELSE round((debt_to_capitalization / NULLIF(equity_to_capitalization, 0)), 2)
+    END AS debt_to_equity_ratio
+FROM
+    debt_to_equity;
+
 
 -- SELECT * FROM mysql_portfolio.debt_to_equity_ratio;
 

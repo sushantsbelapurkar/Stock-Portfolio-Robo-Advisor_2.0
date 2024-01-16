@@ -32,8 +32,8 @@ and symbol_list.exchangeShortName = exchangeName
  key_metrics_maxyr.bookValuePerShare,
  round(_50day_avg_price/NULLIF(key_metrics_maxyr.bookValuePerShare,0),2) as pbratio,
  round((_50day_avg_price/NULLIF(key_metrics_maxyr.bookValuePerShare,0))
- *(round((round(_50day_avg_price/NULLIF(ttm_eps,0),2)+round(_200day_avg_price/NULLIF(ttm_eps,0),2)+round(_5yr_avg_price/NULLIF(_5yr_avg_eps,0),2))/3,2)),2) as ratio_pe_into_pb,
- curdate() as created_at
+ *(round((round(_50day_avg_price/NULLIF(ttm_eps,0),2)+round(_200day_avg_price/NULLIF(ttm_eps,0),2)+round(_5yr_avg_price/NULLIF(_5yr_avg_eps,0),2))/3,2)),2) as ratio_pe_into_pb
+
  -- (pe_ratio1+pe_ratio2+pe_ratio3+pe_ratio4)/4 as avg_pe_ratio
  FROM
  mysql_portfolio.eps_info eps
@@ -48,5 +48,5 @@ and symbol_list.exchangeShortName = exchangeName
  ON _5year.symbol = eps.symbol
  LEFT JOIN key_metrics_maxyr
  ON eps.symbol = key_metrics_maxyr.symbol;
- SELECT count(*) from mysql_portfolio.pe_pb_ratio_info;
+
  END ;

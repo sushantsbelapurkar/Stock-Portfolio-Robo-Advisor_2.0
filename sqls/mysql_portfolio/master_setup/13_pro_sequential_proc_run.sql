@@ -62,8 +62,8 @@ INSERT INTO mysql_portfolio.proc_exec_history VALUES ('fundamental_analysis_info
 CALL mysql_portfolio.value_analysis_info(@value_to_use);
 INSERT INTO mysql_portfolio.proc_exec_history VALUES ('value_analysis_info',@value_to_use,now());
 -- 12
-CALL mysql_portfolio.capm_wacc_info(@value_to_use);
-INSERT INTO mysql_portfolio.proc_exec_history VALUES ('capm_wacc_info',@value_to_use,now());
+CALL mysql_portfolio.capm_wacc_tmp(@value_to_use);
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('capm_wacc_tmp',@value_to_use,now());
 -- 10
 CALL mysql_portfolio.growth_analysis_info(@value_to_use);
 INSERT INTO mysql_portfolio.proc_exec_history VALUES ('growth_analysis_info',@value_to_use,now());

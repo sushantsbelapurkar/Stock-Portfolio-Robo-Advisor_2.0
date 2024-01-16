@@ -45,8 +45,7 @@ SELECT DISTINCT
     pcashflow.freeCashFlow,pcashflow.latest_cash_flow_date,pcashflow.operatingCashFlow,
     pcashflow.price_fcf_ratio,pcashflow.price_ocf_ratio,keymetrics.priceToSalesRatio,
     keymetrics.dividendYield, keymetrics.debtToEquity,keymetrics.currentRatio,keymetrics.roe,keymetrics.roic,keymetrics.inventoryTurnover,
-    keymetrics.peRatio as live_peratio, keymetrics.pbratio as live_pbratio, keymetrics.grahamNetNet, keymetrics.grahamNumber,
-    curdate() as created_at
+    keymetrics.peRatio as live_peratio, keymetrics.pbratio as live_pbratio, keymetrics.grahamNetNet, keymetrics.grahamNumber
     FROM mysql_portfolio.stock_screener screener
     INNER JOIN mysql_portfolio.symbol_list
 	on symbol_list.symbol = screener.symbol
