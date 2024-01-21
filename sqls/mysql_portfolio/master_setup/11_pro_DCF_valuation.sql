@@ -4,13 +4,8 @@ CREATE PROCEDURE mysql_portfolio.dcf_info(
 IN exchangeName varchar(255)
 )
 BEGIN
- DROP TABLE IF EXISTS mysql_portfolio.gdp_data;
- CREATE TABLE mysql_portfolio.gdp_data
- (
-   country varchar(20),
-   year int,
-   gdp float(4,2)
- );
+-- DROP TABLE IF EXISTS mysql_portfolio.gdp_data;
+-- CREATE TABLE mysql_portfolio.gdp_data
 
  INSERT INTO mysql_portfolio.gdp_data VALUES ('USA', 2023, 1.5);
  INSERT INTO mysql_portfolio.gdp_data VALUES ('India', 2021, 5.5);
@@ -19,8 +14,9 @@ BEGIN
 -- ------///////////////METHOD 2 --> MOSTLY USED SIMPLE FREE CASHFLOW METHOD --> USING NOW
 -- SOURCE = https://www.youtube.com/watch?v=fd_emLLzJnk&t=645s
 -- CONSIDERING PERPETUALL GROWTH RATE = 3.2% OR 0.032 : source: https://macabacus.com/valuation/dcf/terminal-value
- DROP TABLE IF EXISTS mysql_portfolio.progressive_free_cashflow;
-CREATE TABLE mysql_portfolio.progressive_free_cashflow as
+-- DROP TABLE IF EXISTS mysql_portfolio.progressive_free_cashflow;
+-- CREATE TABLE mysql_portfolio.progressive_free_cashflow as
+INSERT INTO mysql_portfolio.progressive_free_cashflow
 SELECT terminal.*,wacc_data.wacc,
 ROUND (((yr5_prog_fcf*(1+0.032))/
 ((wacc_data.wacc/100.00) - 0.032)),2) AS terminal_value FROM
@@ -51,8 +47,9 @@ ON wacc_data.symbol = terminal.symbol
 ;
 -- SELECT * FROM mysql_portfolio.progressive_free_cashflow;
 
-DROP TABLE IF EXISTS mysql_portfolio.dcf_data;
-CREATE TABLE mysql_portfolio.dcf_data as
+-- DROP TABLE IF EXISTS mysql_portfolio.dcf_data;
+-- CREATE TABLE mysql_portfolio.dcf_data as
+INSERT INTO mysql_portfolio.dcf_data
 SELECT dcf.*,shares_float.outstandingShares, (todays_value/shares_float.outstandingShares) as dcf_fair_value FROM
 (
 SELECT *, (pv_fcf_yr1+pv_fcf_yr2+pv_fcf_yr3+pv_fcf_yr4+pv_fcf_yr5+pv_fcf_terminal_value) AS todays_value FROM
@@ -70,9 +67,7 @@ ON  shares_float.symbol = dcf.symbol
 -- AND year(shares_float.date) = (SELECT MAX(year(shares_float.date)) FROM mysql_portfolio.shares_float)
 ;
 
-SELECT COUNT(*) FROM mysql_portfolio.dcf_data;
+SELECT COUNT(*), 'records inserted in wacc_data table' FROM mysql_portfolio.dcf_data;
 END ;
-
-
 
 

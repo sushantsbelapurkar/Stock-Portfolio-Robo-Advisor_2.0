@@ -4,8 +4,9 @@ CREATE PROCEDURE mysql_portfolio.price_cah_flow_info(
 IN exchangeName varchar(255)
 )
 BEGIN
-drop table IF EXISTS mysql_portfolio.price_cashflow_info;
-create table  mysql_portfolio.price_cashflow_info as
+-- drop table IF EXISTS mysql_portfolio.price_cashflow_info;
+-- create table  mysql_portfolio.price_cashflow_info as
+INSERT INTO mysql_portfolio.price_cashflow_info
 WITH cash_flow_rownum as
  (
   SELECT cf.*,row_number() over (partition by cf.symbol order by cf.calendarYear) as row_numb
@@ -36,5 +37,5 @@ SELECT cash_flow.symbol,cash_flow.date as latest_cash_flow_date, cash_flow.calen
 and symbol_list.exchangeShortName = exchangeName
  WHERE cash_flow.row_numb = cash_flow_statement_max.max_row_numb
  ;
- SELECT count(*) from mysql_portfolio.price_cashflow_info;
+ SELECT count(*), 'records inserted in price_cashflow_info table' from mysql_portfolio.price_cashflow_info;
  END ;

@@ -1,17 +1,7 @@
 -- If we made any changes in the SP first create the SPs again
 -- CALL  mysql_portfolio.drop_base_data();
 USE mysql_portfolio;
-DROP TABLE IF EXISTS mysql_portfolio.proc_exec_history;
-CREATE TABLE mysql_portfolio.proc_exec_history
- (
- proc_name varchar(255) not null,
- exchange varchar(255) not null,
- executed_at timestamp not null
- );
-
 DROP PROCEDURE IF EXISTS exchange_proc_loop;
-
-
 CREATE PROCEDURE exchange_proc_loop()
 BEGIN
     DECLARE counter INT DEFAULT 1;

@@ -4,8 +4,9 @@ DROP PROCEDURE IF EXISTS mysql_portfolio.growth_analysis_info;
   IN exchangeName varchar(255)
   )
   BEGIN
-  DROP TABLE IF EXISTS mysql_portfolio.growth_analysis;
-  CREATE TABLE mysql_portfolio.growth_analysis AS
+--  DROP TABLE IF EXISTS mysql_portfolio.growth_analysis;
+--  CREATE TABLE mysql_portfolio.growth_analysis AS
+INSERT INTO mysql_portfolio.growth_analysis
    SELECT stock_param.symbol,stock_param.latest_price_date, stock_param.recent_ebitda_growth,stock_param.ebitda_cagr,
    stock_param.recent_netincome_growth,stock_param.netincome_cagr,stock_param.recent_revenue_growth,stock_param.revenue_cagr,
    key_m.roe,fin_growth.fiveYShareholdersEquityGrowthPerShare,fin_growth.fiveYOperatingCFGrowthPerShare,fin_growth.fiveYDividendperShareGrowthPerShare,
@@ -96,7 +97,7 @@ DROP PROCEDURE IF EXISTS mysql_portfolio.growth_analysis_info;
    ON wacc_data.symbol = stock_param.symbol
    AND YEAR(wacc_data.date) = stock_param.calendarYear
    ;
-   SELECT count(*) FROM mysql_portfolio.growth_analysis;
+   SELECT count(*), 'records inserted in growth_analysis table' FROM mysql_portfolio.growth_analysis;
    END ;
 
 

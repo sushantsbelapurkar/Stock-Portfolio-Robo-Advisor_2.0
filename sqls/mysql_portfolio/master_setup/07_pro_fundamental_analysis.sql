@@ -5,8 +5,9 @@
   IN exchangeName varchar(255)
   )
   BEGIN
-   DROP TABLE IF EXISTS mysql_portfolio.fundamental_analysis;
-   CREATE TABLE mysql_portfolio.fundamental_analysis AS
+--   DROP TABLE IF EXISTS mysql_portfolio.fundamental_analysis;
+--   CREATE TABLE mysql_portfolio.fundamental_analysis AS
+INSERT INTO mysql_portfolio.fundamental_analysis
    SELECT vw_param_chk.symbol,industry,sector,calendarYear,positive_eps_growth_3yrs,recent_eps_growth,debtToEquity,currentRatio,inventoryTurnover,
    roe,roic,
    CASE
@@ -52,5 +53,5 @@ INNER JOIN mysql_portfolio.symbol_list
  on symbol_list.symbol = vw_param_chk.symbol
 and symbol_list.exchangeShortName = exchangeName;
 
-SELECT count(*) from mysql_portfolio.fundamental_analysis;
+SELECT count(*), 'records inserted in fundamental_analysis table' from mysql_portfolio.fundamental_analysis;
 END  ;

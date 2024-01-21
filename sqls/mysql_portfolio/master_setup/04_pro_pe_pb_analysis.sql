@@ -4,8 +4,9 @@ CREATE PROCEDURE mysql_portfolio.pepb_info(
 IN exchangeName varchar(255)
 )
 BEGIN
-DROP TABLE IF EXISTS mysql_portfolio.pe_pb_ratio_info;
-create table mysql_portfolio.pe_pb_ratio_info as
+-- DROP TABLE IF EXISTS mysql_portfolio.pe_pb_ratio_info;
+-- create table mysql_portfolio.pe_pb_ratio_info as
+INSERT INTO mysql_portfolio.pe_pb_ratio_info
  WITH key_metrics_rownum as
  (
   SELECT km.*,year(km.date) as calendarYear, row_number() over (partition by km.symbol order by year(km.date)) as row_numb
@@ -49,4 +50,5 @@ and symbol_list.exchangeShortName = exchangeName
  LEFT JOIN key_metrics_maxyr
  ON eps.symbol = key_metrics_maxyr.symbol;
 
+SELECT count(*), 'records inserted in pe_pb_ratio_info table' from mysql_portfolio.pe_pb_ratio_info;
  END ;

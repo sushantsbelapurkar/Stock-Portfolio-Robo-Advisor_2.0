@@ -4,8 +4,9 @@ IN exchangeName varchar(255)
 )
 BEGIN
 -- -------------------------------- 50 DAY AVG/MOVING AVG ----------------------------
-DROP TABLE IF EXISTS mysql_portfolio._50_day_avg_price_info;
-create table mysql_portfolio._50_day_avg_price_info as
+-- DROP TABLE IF EXISTS mysql_portfolio._50_day_avg_price_info;
+-- create table mysql_portfolio._50_day_avg_price_info as
+INSERT INTO mysql_portfolio._50_day_avg_price_info
  WITH fifty_days AS
  (
  SELECT hp.symbol,hp.date,hp.close,
@@ -33,8 +34,9 @@ row_number() over (partition by hp.symbol order by hp.date) as row_numb, curdate
  -- SELECT * FROM mysql_portfolio._50_day_avg_price_info;
 
  -- -------------------------------- 200 DAY AVG/MOVING AVG ------------------------------------
- DROP TABLE IF EXISTS mysql_portfolio._200_day_avg_price_info;
- create table mysql_portfolio._200_day_avg_price_info as
+-- DROP TABLE IF EXISTS mysql_portfolio._200_day_avg_price_info;
+-- create table mysql_portfolio._200_day_avg_price_info as
+INSERT INTO mysql_portfolio._200_day_avg_price_info
  WITH twohundred_days AS
  (
  SELECT hp.symbol,hp.date,hp.close,
@@ -61,8 +63,9 @@ row_number() over (partition by hp.symbol order by hp.date) as row_numb, curdate
  -- SELECT * FROM mysql_portfolio._200_day_avg_price_info;
 
  -- -------------------------------- 5 YEAR AVG ------------------------------------
-DROP TABLE IF EXISTS mysql_portfolio._5_year_avg_price_info;
- create table mysql_portfolio._5_year_avg_price_info as
+-- DROP TABLE IF EXISTS mysql_portfolio._5_year_avg_price_info;
+-- create table mysql_portfolio._5_year_avg_price_info as
+INSERT INTO mysql_portfolio._5_year_avg_price_info
  WITH five_yr_days AS
  (
  SELECT hp.symbol,hp.date,hp.close,
@@ -89,8 +92,9 @@ row_number() over (partition by hp.symbol order by hp.date) as row_numb, curdate
 --  SELECT * FROM mysql_portfolio._5_year_avg_price_info;
 
  -- ---------------------GOLDEN/DEATH CROSS ANALYSIS ------------------------------------
-DROP TABLE IF EXISTS mysql_portfolio.golden_death_cross;
- CREATE TABLE mysql_portfolio.golden_death_cross AS
+-- DROP TABLE IF EXISTS mysql_portfolio.golden_death_cross;
+-- CREATE TABLE mysql_portfolio.golden_death_cross AS
+INSERT INTO mysql_portfolio.golden_death_cross
  WITH _50_200_days AS
  (
 SELECT _50day.symbol, _50day.latest_price_date,_50day.days_considered as days_consider_50,_50day._50day_avg_price,
@@ -112,6 +116,6 @@ FROM _50_200_days
 WHERE _200day_avg_price !=0 AND _200day_avg_price IS NOT NULL
 ;
 -- SELECT * FROM mysql_portfolio.golden_death_cross;
-SELECT count(*) from mysql_portfolio.golden_death_cross;
+SELECT count(*), 'records inserted in golden_death_cross table' from mysql_portfolio.golden_death_cross;
 END  ;
 

@@ -5,9 +5,8 @@
  CREATE PROCEDURE mysql_portfolio.company_analysis_score_info(
  IN exchangeName varchar(255))
  BEGIN
--- DROP TABLE IF EXISTS mysql_portfolio.company_analysis;
--- CREATE TABLE mysql_portfolio.company_analysis AS
-INSERT INTO mysql_portfolio.company_analysis
+ DROP TABLE IF EXISTS mysql_portfolio.company_analysis;
+ CREATE TABLE mysql_portfolio.company_analysis AS
  SELECT DISTINCT fundamental.symbol,fundamental.calendarYear,fundamental.eps_growth_analysis,fundamental.debt_to_equity_analysis,
  fundamental.current_ratio_analysis,fundamental.inventory_analysis,fundamental.roe_analysis,fundamental.roic_analysis,
  value_a.pe_ratio_analysis,value_a.pe_and_sector_pe_analysis,value_a.pb_ratio_analysis,value_a.pepb_ratio_analysis,
@@ -25,9 +24,13 @@ INSERT INTO mysql_portfolio.company_analysis
  ON growth.symbol = fundamental.symbol;
 
  -- SELECT * FROM mysql_portfolio.company_analysis;
-DROP TEMPORARY TABLE IF EXISTS mysql_portfolio.param_score;
-CREATE TEMPORARY TABLE mysql_portfolio.param_score AS
- SELECT DISTINCT comp.symbol, comp.calendarYear,
+
+ DROP TABLE IF EXISTS mysql_portfolio.company_score;
+
+ CREATE TABLE mysql_portfolio.company_score AS
+ WITH param_score AS
+ (
+ SELECT comp.symbol, comp.calendarYear,
  CASE
  WHEN comp.eps_growth_analysis = 'strong' THEN 10
  WHEN comp.eps_growth_analysis IN ('recent_negative','bit_risky') THEN 7
@@ -151,54 +154,53 @@ CREATE TEMPORARY TABLE mysql_portfolio.param_score AS
  INNER JOIN mysql_portfolio.symbol_list
  on symbol_list.symbol = comp.symbol
  and symbol_list.exchangeShortName = exchangeName
- ;
- DROP TEMPORARY TABLE IF EXISTS mysql_portfolio.fundamental_score;
- CREATE TEMPORARY TABLE mysql_portfolio.fundamental_score AS
-  SELECT distinct param_score.symbol,
+ ),
+ fundamental_score AS
+ (
+  SELECT param_score.symbol,
   (eps_growth_score+debt_to_equity_score+current_ratio_score+roe_score+roic_score+pe_ratio_score+pb_ratio_score+pepb_ratio_score) as fundamental_score
-  FROM mysql_portfolio.param_score
+  FROM param_score
   INNER JOIN mysql_portfolio.symbol_list
   on symbol_list.symbol = param_score.symbol
   and symbol_list.exchangeShortName = exchangeName
-;
-DROP TEMPORARY TABLE IF EXISTS mysql_portfolio.growth_score;
-  CREATE TEMPORARY TABLE mysql_portfolio.growth_score AS
-	SELECT distinct param_score.symbol,
+  ),
+  growth_score AS
+  (
+	SELECT param_score.symbol,
     (ebitda_growth_score+netincome_growth_score+sales_growth_score+roe_growth_score+shareholder_equity_growth_score+operating_cash_flow_growth_score
     +divident_growth_score+rdexpense_growth_score+capex_growth_ofc_score+capex_growth_revenue_score) as growth_score
-    FROM mysql_portfolio.param_score
+    FROM param_score
     INNER JOIN mysql_portfolio.symbol_list
     on symbol_list.symbol = param_score.symbol
    and symbol_list.exchangeShortName = exchangeName
-  ;
-  DROP TEMPORARY TABLE IF EXISTS mysql_portfolio.main_param_score;
-  CREATE TEMPORARY TABLE mysql_portfolio.main_param_score AS
-    SELECT distinct param_score.symbol,
+  ),
+  main_param_score AS
+  (
+    SELECT param_score.symbol,
     (eps_growth_score+debt_to_equity_score+current_ratio_score+roe_score+pepb_ratio_score+ebitda_growth_score+sales_growth_score+roe_growth_score+
     roic_wacc_score) AS main_score
-    FROM mysql_portfolio.param_score
+    FROM param_score
     INNER JOIN mysql_portfolio.symbol_list
     on symbol_list.symbol = param_score.symbol
    and symbol_list.exchangeShortName = exchangeName
-;
-DROP TEMPORARY TABLE IF EXISTS mysql_portfolio.total_score;
-   CREATE TEMPORARY TABLE mysql_portfolio.total_score AS
-     SELECT distinct param.symbol,
+  ),
+    total_score AS
+    (
+     SELECT param.symbol,
      fun.fundamental_score, gr.growth_score, main.main_score as main_param_score,
      (fun.fundamental_score+gr.growth_score+param.inventory_score+param.pe_vs_sector_pe_score+param.price_ocf_score+param.price_to_sales_score
      +param.roic_wacc_score) as total_score
-     FROM mysql_portfolio.param_score param
+     FROM param_score param
      INNER JOIN mysql_portfolio.symbol_list
      on symbol_list.symbol = param.symbol
      and symbol_list.exchangeShortName = exchangeName
-     LEFT JOIN mysql_portfolio.fundamental_score fun ON fun.symbol = param.symbol
-     LEFT JOIN mysql_portfolio.growth_score gr ON gr.symbol = param.symbol
-     LEFT JOIN mysql_portfolio.main_param_score main ON main.symbol = param.symbol
- ;
-
-DROP TEMPORARY TABLE IF EXISTS mysql_portfolio.all_score;
-CREATE TEMPORARY TABLE mysql_portfolio.all_score AS
-     SELECT distinct param.symbol,param.calendarYear, fun.fundamental_score,gr.growth_score, main.main_score,total.total_score,
+     LEFT JOIN fundamental_score fun ON fun.symbol = param.symbol
+     LEFT JOIN growth_score gr ON gr.symbol = param.symbol
+     LEFT JOIN main_param_score main ON main.symbol = param.symbol
+     ),
+     all_score AS
+     (
+     SELECT param.symbol,param.calendarYear, fun.fundamental_score,gr.growth_score, main.main_score,total.total_score,
      CASE
      WHEN fun.fundamental_score >=62 THEN 'buy'
      WHEN fun.fundamental_score >=53 AND fun.fundamental_score <62  THEN 'border_level'
@@ -221,30 +223,66 @@ CREATE TEMPORARY TABLE mysql_portfolio.all_score AS
      ELSE 'weak' END AS overall_signal,
      param.roic_wacc_score,param.inventory_score
      -- api_rating.rating as api_rating, api_rating.ratingScore as api_score
-     FROM mysql_portfolio.param_score param
+     FROM param_score param
      INNER JOIN mysql_portfolio.symbol_list
      on symbol_list.symbol = param.symbol
      and symbol_list.exchangeShortName = exchangeName
-     LEFT JOIN mysql_portfolio.fundamental_score fun ON fun.symbol = param.symbol
-     LEFT JOIN mysql_portfolio.growth_score gr ON gr.symbol = param.symbol
-     LEFT JOIN mysql_portfolio.main_param_score main ON main.symbol = param.symbol
-     LEFT JOIN mysql_portfolio.total_score total ON total.symbol = param.symbol
-;
+     LEFT JOIN fundamental_score fun ON fun.symbol = param.symbol
+     LEFT JOIN growth_score gr ON gr.symbol = param.symbol
+     LEFT JOIN main_param_score main ON main.symbol = param.symbol
+     LEFT JOIN total_score total ON total.symbol = param.symbol
+     -- LEFT JOIN mysql_portfolio.api_rating
+--      ON api_rating.symbol = param.symbol
+     )
+     SELECT * from all_score;
 
-create index idx_symbol on mysql_portfolio.all_score(symbol(255));
+ -- SELECT * FROM mysql_portfolio.company_score;
+--  SELECT * FROM mysql_portfolio.stock_peer;
+--  DROP TABLE mysql_portfolio.stock_peer;
+--  SELECT * FROM mysql_portfolio.api_rating;
 
--- DROP TABLE IF EXISTS mysql_portfolio.company_score;
--- CREATE TABLE mysql_portfolio.company_score AS
-INSERT INTO mysql_portfolio.company_score
-     SELECT * from mysql_portfolio.all_score;
+DROP TABLE IF EXISTS mysql_portfolio.fair_price_analysis;
+CREATE TABLE mysql_portfolio.fair_price_analysis AS
+WITH fair_price AS
+(
+SELECT eps_info.symbol,eps_info.calendarYear,
+round(15*eps_info._5yr_avg_eps,2) as eps_fair_value,round(key_metrics.grahamNumber,2) as graham_number,
+round(dcf_data.dcf_fair_value,2) as dcf_fair_value,
+round(api_dcf.dcf,2) as api_dcf_value,
+price.latest_price_date,price.latest_close_price, price._50day_avg_price
+ FROM mysql_portfolio.eps_info
+ INNER JOIN mysql_portfolio.symbol_list
+ on symbol_list.symbol = eps_info.symbol
+ and symbol_list.exchangeShortName = exchangeName
+ LEFT JOIN mysql_portfolio.key_metrics
+ ON key_metrics.symbol = eps_info.symbol
+ AND year(key_metrics.date) = eps_info.calendarYear
+ LEFT JOIN mysql_portfolio.dcf_data
+ ON dcf_data.symbol = eps_info.symbol
+ AND dcf_data.calendarYear = eps_info.calendarYear
+ LEFT JOIN mysql_portfolio.api_dcf
+ ON api_dcf.symbol = eps_info.symbol
+ LEFT JOIN mysql_portfolio._50_day_avg_price_info price
+ ON price.symbol = eps_info.symbol
+ )
+ SELECT * ,
+ CASE
+WHEN (latest_close_price <= eps_fair_value OR latest_close_price <= graham_number) THEN 'undervalued'
+WHEN (latest_close_price > eps_fair_value AND latest_close_price <= eps_fair_value+eps_fair_value*0.2)
+	OR (latest_close_price > graham_number AND latest_close_price <= eps_fair_value+eps_fair_value*0.2)
+THEN 'border_level'
+ELSE 'overvalued' END AS latest_price_compared_to_eps_graham,
+CASE
+WHEN latest_close_price <= dcf_fair_value THEN 'undervalued'
+ELSE 'overvalued' END AS latest_price_compared_to_dcf
+FROM fair_price
+INNER JOIN mysql_portfolio.symbol_list
+on symbol_list.symbol = fair_price.symbol
+and symbol_list.exchangeShortName = exchangeName
+ ;
 
-DROP TEMPORARY TABLE mysql_portfolio.param_score;
-DROP TEMPORARY TABLE mysql_portfolio.fundamental_score;
-DROP TEMPORARY TABLE mysql_portfolio.growth_score;
-DROP TEMPORARY TABLE mysql_portfolio.main_param_score;
-DROP TEMPORARY TABLE mysql_portfolio.total_score;
-DROP TEMPORARY TABLE mysql_portfolio.all_score;
-
-SELECT COUNT(*), 'records inserted in company_score table' FROM mysql_portfolio.company_score;
-END  ;
+CREATE INDEX idx_symbol ON mysql_portfolio.company_analysis(symbol);
+CREATE INDEX idx_symbol ON mysql_portfolio.company_score(symbol);
+ SELECT COUNT(*), 'records inserted in company_analysis table' FROM mysql_portfolio.company_analysis;
+ END  ;
 

@@ -4,8 +4,9 @@
   IN exchangeName varchar(255)
   )
   BEGIN
-   DROP TABLE IF EXISTS mysql_portfolio.value_analysis;
-   CREATE TABLE mysql_portfolio.value_analysis AS
+--   DROP TABLE IF EXISTS mysql_portfolio.value_analysis;
+--   CREATE TABLE mysql_portfolio.value_analysis AS
+INSERT INTO mysql_portfolio.value_analysis
    SELECT stock_param.symbol,stock_param.latest_price_date, stock_param.latest_close_price,stock_param._50day_avg_price,stock_param._200day_avg_price,stock_param._5yr_avg_price,
    stock_param.final_pe_ratio,stock_param.live_peratio,
    stock_param.pbratio,stock_param.live_pbratio,stock_param.ratio_pe_into_pb,stock_param.price_fcf_ratio,stock_param.price_ocf_ratio,stock_param.priceToSalesRatio,
@@ -44,5 +45,6 @@
    and symbol_list.exchangeShortName = exchangeName
   ;
 
+   SELECT count(*), 'records inserted in value_analysis table' from mysql_portfolio.value_analysis;
    END ;
 

@@ -1,9 +1,12 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.decision_view_info;
 
-CREATE PROCEDURE mysql_portfolio.decision_view_info()
+CREATE PROCEDURE mysql_portfolio.decision_view_info(
+IN exchangeName varchar(255)
+)
 BEGIN
-DROP VIEW IF EXISTS mysql_portfolio.vw_stock_parameter_check;
-CREATE VIEW mysql_portfolio.vw_stock_parameter_check AS
+-- DROP TABLE IF EXISTS mysql_portfolio.vw_stock_parameter_check;
+-- CREATE TABLE mysql_portfolio.vw_stock_parameter_check AS
+INSERT INTO mysql_portfolio.vw_stock_parameter_check
 WITH key_metrics_rownum as
  (
   SELECT key_metrics.*,year(key_metrics.date) as calendarYear, row_number() over (partition by key_metrics.symbol order by year(key_metrics.date)) as row_numb
@@ -11,7 +14,7 @@ WITH key_metrics_rownum as
   INNER JOIN mysql_portfolio.symbol_list
  on symbol_list.symbol = key_metrics.symbol
 -- and symbol_list.exchangeShortName = exchange_name()
-and symbol_list.exchangeShortName = 'NSE'
+and symbol_list.exchangeShortName = exchangeName
   ),
   key_metrics_max as
   (
@@ -50,7 +53,7 @@ SELECT DISTINCT
     INNER JOIN mysql_portfolio.symbol_list
 	on symbol_list.symbol = screener.symbol
 	-- and symbol_list.exchangeShortName = exchange_name()
-    and symbol_list.exchangeShortName = 'NSE'
+    and symbol_list.exchangeShortName = exchangeName
     LEFT JOIN mysql_portfolio.pe_pb_ratio_info pepb
     ON pepb.symbol = screener.symbol
     LEFT JOIN mysql_portfolio.ebitda_info ebitda
@@ -70,6 +73,6 @@ SELECT DISTINCT
     AND pepb.symbol is not null order by symbol
   --   AND screener.symbol in ('AAPL','MSFT')
     ;
-    SELECT count(*) from mysql_portfolio.vw_stock_parameter_check;
+    SELECT count(*), 'records inserted in vw_stock_parameter_check table' from mysql_portfolio.vw_stock_parameter_check;
     END  ;
 

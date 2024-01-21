@@ -5,8 +5,9 @@ CREATE PROCEDURE mysql_portfolio.cagr_info(
 IN exchangeName varchar(255)
 ) 
 BEGIN
- DROP TABLE IF EXISTS mysql_portfolio.ebitda_info;
- create table mysql_portfolio.ebitda_info as
+-- DROP TABLE IF EXISTS mysql_portfolio.ebitda_info;
+-- create table mysql_portfolio.ebitda_info as
+INSERT INTO mysql_portfolio.ebitda_info
  WITH ebitda_growth as
  (
  SELECT inc.symbol,inc.calendarYear, inc.ebitda,
@@ -103,8 +104,9 @@ THEN
 
 
  -- --------------------------------- netincome CAGR ----------------------------------------
- DROP TABLE IF EXISTS mysql_portfolio.netincome_info;
- create table mysql_portfolio.netincome_info as
+-- DROP TABLE IF EXISTS mysql_portfolio.netincome_info;
+-- create table mysql_portfolio.netincome_info as
+INSERT INTO mysql_portfolio.netincome_info
  WITH netincome_growth as
  (
  SELECT cf.symbol,cf.calendarYear, cf.netincome,
@@ -203,8 +205,9 @@ THEN
 
 
  -- --------------------------------- sales/revenue CAGR ----------------------------------------
- DROP TABLE IF EXISTS mysql_portfolio.sales_info;
- create table mysql_portfolio.sales_info as
+-- DROP TABLE IF EXISTS mysql_portfolio.sales_info;
+-- create table mysql_portfolio.sales_info as
+INSERT INTO mysql_portfolio.sales_info
  WITH sales_growth as
  (
  SELECT inc.symbol,inc.calendarYear,inc.revenue,
@@ -301,8 +304,9 @@ THEN
 
 
  -- --------------------------------- free cash flow CAGR ----------------------------------------
- DROP TABLE IF EXISTS mysql_portfolio.free_cash_flow_info;
- create table mysql_portfolio.free_cash_flow_info as
+-- DROP TABLE IF EXISTS mysql_portfolio.free_cash_flow_info;
+-- create table mysql_portfolio.free_cash_flow_info as
+INSERT INTO mysql_portfolio.free_cash_flow_info
  WITH free_cashflow_growth as
  (
  SELECT cf.symbol,cf.calendarYear, cf.freeCashFlow,
@@ -394,6 +398,6 @@ THEN
  WHERE free_cashflow_details.row_numb = max_row.max_row_numb order by 1,2
  ;
 
- SELECT count(*) FROM mysql_portfolio.free_cash_flow_info;
+ SELECT count(*),'records inserted in free_cash_flow_info table' FROM mysql_portfolio.free_cash_flow_info;
 END ;
 

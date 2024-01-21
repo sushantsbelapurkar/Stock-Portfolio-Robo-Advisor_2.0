@@ -66,8 +66,9 @@ BEGIN
         SET i = i-1;
      END WHILE;
 
-   DROP TABLE IF EXISTS mysql_portfolio.rate_of_return_info;
-   CREATE TABLE mysql_portfolio.rate_of_return_info as
+--   DROP TABLE IF EXISTS mysql_portfolio.rate_of_return_info;
+--   CREATE TABLE mysql_portfolio.rate_of_return_info as
+INSERT INTO mysql_portfolio.rate_of_return_info
      SELECT tror1.symbol,tror1.year,tror1.latest_date,tror1.rate_of_return
      FROM mysql_portfolio.tmp_rate_of_return1 tror1
      INNER JOIN mysql_portfolio.symbol_list
@@ -75,8 +76,9 @@ BEGIN
 	and symbol_list.exchangeShortName = exchangeName
      WHERE tror1.rank_ = 1;
 
-DROP TABLE IF EXISTS mysql_portfolio.avg_std_dev;
-CREATE TABLE mysql_portfolio.avg_std_dev AS
+-- DROP TABLE IF EXISTS mysql_portfolio.avg_std_dev;
+-- CREATE TABLE mysql_portfolio.avg_std_dev AS
+INSERT INTO mysql_portfolio.avg_std_dev
  WITH avg_stdev AS
  (
  SELECT rori.*,
@@ -101,8 +103,9 @@ CREATE TABLE mysql_portfolio.avg_std_dev AS
  on symbol_list.symbol = avg_stdev.symbol
  AND symbol_list.exchangeShortName = exchangeName;
 
- DROP TABLE IF EXISTS mysql_portfolio.expected_return;
- CREATE table mysql_portfolio.expected_return AS
+-- DROP TABLE IF EXISTS mysql_portfolio.expected_return;
+-- CREATE table mysql_portfolio.expected_return AS
+INSERT INTO mysql_portfolio.expected_return
  WITH expected_parameters AS
  (
  SELECT avg_std_dev.symbol,avg_std_dev.latest_price_date,
@@ -130,13 +133,8 @@ CREATE TABLE mysql_portfolio.avg_std_dev AS
  FROM expected_parameters
  ;
 
-DROP TABLE IF EXISTS mysql_portfolio.risk_free_rate;
- CREATE TABLE mysql_portfolio.risk_free_rate
- (
-  latest_date date,
-  t_bill_rate float(4,2),
-  exchange_name varchar(255)
-  );
+-- DROP TABLE IF EXISTS mysql_portfolio.risk_free_rate;
+-- CREATE TABLE mysql_portfolio.risk_free_rate
 --  SELECT * FROM mysql_portfolio.risk_free_rate;
 --  LOAD XML LOCAL INFILE '/Users/sushantbelapurkar/downloads/SUSHANT/XmlView.xml'
 -- INTO TABLE mysql_portfolio.risk_free_rate(latest_date, t_bill_rate);
@@ -160,8 +158,9 @@ DROP TABLE IF EXISTS mysql_portfolio.risk_free_rate;
 
  -- ABOVE SAME QUERY CAN BE WRITTEN/SIMPLIFIED AS
 
-DROP TABLE IF EXISTS mysql_portfolio.cost_of_equity;
- CREATE TABLE mysql_portfolio.cost_of_equity AS
+-- DROP TABLE IF EXISTS mysql_portfolio.cost_of_equity;
+-- CREATE TABLE mysql_portfolio.cost_of_equity AS
+INSERT INTO mysql_portfolio.cost_of_equity
  (
  WITH rate as
  (
@@ -186,8 +185,9 @@ DROP TABLE IF EXISTS mysql_portfolio.cost_of_equity;
 
 -- SELECT * FROM mysql_portfolio.cost_of_equity;
 
-DROP TABLE IF EXISTS mysql_portfolio.cost_of_debt;
-CREATE TABLE mysql_portfolio.cost_of_debt AS
+-- DROP TABLE IF EXISTS mysql_portfolio.cost_of_debt;
+-- CREATE TABLE mysql_portfolio.cost_of_debt AS
+INSERT INTO mysql_portfolio.cost_of_debt
 WITH balance_sheet_row_num AS
 (
  SELECT balance_sheet.*,row_number() over (partition by balance_sheet.symbol order by balance_sheet.calendarYear) as row_numb
@@ -248,8 +248,9 @@ FROM cost_of_debt_temp;
 -- SELECT * FROM mysql_portfolio.cost_of_debt;
 
 
- DROP TABLE IF EXISTS mysql_portfolio.debt_to_equity_ratio;
-CREATE TABLE mysql_portfolio.debt_to_equity_ratio AS
+-- DROP TABLE IF EXISTS mysql_portfolio.debt_to_equity_ratio;
+-- CREATE TABLE mysql_portfolio.debt_to_equity_ratio AS
+INSERT INTO mysql_portfolio.debt_to_equity_ratio
 WITH balance_sheet_row_num AS
 (
  SELECT balance_sheet.*,row_number() over (partition by balance_sheet.symbol order by balance_sheet.calendarYear) as row_numb
@@ -307,8 +308,9 @@ FROM
 
 -- SELECT * FROM mysql_portfolio.debt_to_equity_ratio;
 
-DROP TABLE IF EXISTS mysql_portfolio.wacc_data;
-CREATE TABLE mysql_portfolio.wacc_data AS
+-- DROP TABLE IF EXISTS mysql_portfolio.wacc_data;
+-- CREATE TABLE mysql_portfolio.wacc_data AS
+INSERT INTO mysql_portfolio.wacc_data
 SELECT debt_to_equity_ratio.symbol,debt_to_equity_ratio.date,debt_to_equity_ratio.debt_to_capitalization, debt_to_equity_ratio.equity_to_capitalization,
 cost_of_equity.cost_of_equity,cost_of_debt.after_tax_cost_of_debt,
 round((cost_of_equity.cost_of_equity*debt_to_equity_ratio.equity_to_capitalization) +
@@ -323,6 +325,6 @@ ON cost_of_equity.symbol = debt_to_equity_ratio.symbol
 LEFT JOIN mysql_portfolio.cost_of_debt
 ON cost_of_debt.symbol = debt_to_equity_ratio.symbol
 ;
-SELECT COUNT(*) FROM mysql_portfolio.wacc_data;
+SELECT COUNT(*), 'records inserted in wacc_data table' FROM mysql_portfolio.wacc_data;
 
    END ;

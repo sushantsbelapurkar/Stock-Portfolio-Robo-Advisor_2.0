@@ -1,12 +1,12 @@
 -- ---------- eps calculation for last 5 years--------------------
 DROP PROCEDURE IF EXISTS mysql_portfolio.eps_info;
-
 CREATE PROCEDURE mysql_portfolio.eps_info (
 IN exchangeName varchar(255)
 ) 
 BEGIN
- DROP TABLE IF EXISTS mysql_portfolio.eps_info;
- create table mysql_portfolio.eps_info as   
+-- DROP TABLE IF EXISTS mysql_portfolio.eps_info;
+-- create table mysql_portfolio.eps_info as
+INSERT INTO mysql_portfolio.eps_info
  WITH eps_growth AS
  (
  SELECT inc.symbol,inc.calendarYear,inc.eps, lag(inc.eps) over (partition by inc.symbol order by inc.calendarYear) as prev_eps, 
@@ -39,5 +39,6 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
  ON max_row.symbol = eps_details.symbol
  WHERE eps_details.row_numb = max_row.max_row_numb order by 1,2
  ;
- SELECT count(*) from mysql_portfolio.eps_info;
+ SELECT count(*),'records inserted in eps_info table' from mysql_portfolio.eps_info;
+
  END ;

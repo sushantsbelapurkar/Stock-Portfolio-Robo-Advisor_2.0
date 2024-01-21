@@ -12,13 +12,28 @@ args = {
 }
 
 dag = DAG(
-    dag_id="myportfolio",
+    dag_id="myportfolio_initial_setup",
     default_args=args,
     max_active_runs=1,
     schedule_interval="0 12 5 * *",
     params={"execution_sla": None},
     template_searchpath="/Users/sudip/airflow/sqls/",
     catchup=False,
+)
+
+task_ddl_create = MySqlOperator(
+    task_id="ddl_create",
+    dag=dag,
+    sql="mysql_portfolio/master_creation/ddl_creation.sql",
+    mysql_conn_id='mysql_localhost'
+)
+
+task_pro_clean_master = MySqlOperator(
+    task_id="pro_clean_master",
+    # timeout=86400,
+    dag=dag,
+    sql="mysql_portfolio/db_cleanup/02_clean_master_data.sql",
+    mysql_conn_id='mysql_localhost'
 )
 
 task_pro_eps_info = MySqlOperator(
@@ -107,11 +122,4 @@ task_pro_company_analysis = MySqlOperator(
     mysql_conn_id='mysql_localhost'
 )
 
-task_pro_sequential_proc_run = MySqlOperator(
-    task_id="pro_sequential_proc_run",
-    dag=dag,
-    sql="mysql_portfolio/master_setup/13_pro_sequential_proc_run.sql",
-    mysql_conn_id='mysql_localhost'
-)
-
-task_pro_eps_info >> task_pro_carg_info >> task_pro_golden_death_cross >> task_pro_pe_pb_analysis >> task_pro_price_to_cashflow_analysis >> task_pro_decision_view >> task_pro_fundamental_analysis >> pro_value_analysis >> task_pro_growth_analysis >> task_pro_capm_wacc_calc >> task_pro_DCF_valuation >> task_pro_company_analysis >> task_pro_sequential_proc_run
+task_ddl_create >> task_pro_clean_master >> task_pro_eps_info >> task_pro_carg_info >> task_pro_golden_death_cross >> task_pro_pe_pb_analysis >> task_pro_price_to_cashflow_analysis >> task_pro_decision_view >> task_pro_fundamental_analysis >> pro_value_analysis >> task_pro_growth_analysis >> task_pro_capm_wacc_calc >> task_pro_DCF_valuation >> task_pro_company_analysis
