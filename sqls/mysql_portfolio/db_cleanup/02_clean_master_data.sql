@@ -31,5 +31,7 @@ TRUNCATE TABLE mysql_portfolio.dcf_data;
 TRUNCATE TABLE mysql_portfolio.company_analysis;
 TRUNCATE TABLE mysql_portfolio.company_score;
 
+
+
 SELECT 'sp_drop_master_tables_cleanup_completed';
 END;

@@ -21,6 +21,13 @@ dag = DAG(
     catchup=False,
 )
 
+task_pro_clean_master = MySqlOperator(
+    task_id="pro_clean_master",
+    # timeout=86400,
+    dag=dag,
+    sql="mysql_portfolio/db_cleanup/02_clean_master_data.sql",
+    mysql_conn_id='mysql_localhost'
+)
 
 task_pro_sequential_run_nse1 = MySqlOperator(
     task_id="pro_sequential_run_nse1",
@@ -70,4 +77,4 @@ task_pro_sequential_run_nasdaq2 = MySqlOperator(
     mysql_conn_id='mysql_localhost'
 )
 
-task_pro_sequential_run_nse1 >> task_pro_sequential_run_nse2 >> task_pro_sequential_run_nyse1 >> task_pro_sequential_run_nyse2 >> task_pro_sequential_run_nasdaq1 >> task_pro_sequential_run_nasdaq2
+pro_clean_master >> task_pro_sequential_run_nse1 >> task_pro_sequential_run_nse2 >> task_pro_sequential_run_nyse1 >> task_pro_sequential_run_nyse2 >> task_pro_sequential_run_nasdaq1 >> task_pro_sequential_run_nasdaq2
