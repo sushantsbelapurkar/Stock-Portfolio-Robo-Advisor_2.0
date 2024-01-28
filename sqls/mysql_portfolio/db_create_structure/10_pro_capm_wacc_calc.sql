@@ -140,9 +140,6 @@ INSERT INTO mysql_portfolio.expected_return
 -- INTO TABLE mysql_portfolio.risk_free_rate(latest_date, t_bill_rate);
 -- SHOW GLOBAL VARIABLES LIKE 'local_infile';
 -- SET GLOBAL local_infile = true;
- INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',3.5,'NYSE');
- INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',3.5,'NASDAQ');
- INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',7.4,'NSE');
  -- SELECT * FROM mysql_portfolio.risk_free_rate;
 
  -- SELECT DISTINCT rate.symbol,rate.expected_rate_of_return,rate.risk_free_rate,
@@ -326,5 +323,6 @@ LEFT JOIN mysql_portfolio.cost_of_debt
 ON cost_of_debt.symbol = debt_to_equity_ratio.symbol
 ;
 SELECT COUNT(*), 'records inserted in wacc_data table' FROM mysql_portfolio.wacc_data;
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('capm_wacc_tmp',exchangeName,now());
 
    END ;

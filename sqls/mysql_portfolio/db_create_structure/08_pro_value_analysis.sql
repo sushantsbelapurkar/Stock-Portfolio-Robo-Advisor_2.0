@@ -44,7 +44,7 @@ INSERT INTO mysql_portfolio.value_analysis
    on symbol_list.symbol = stock_param.symbol
    and symbol_list.exchangeShortName = exchangeName
   ;
-
-   SELECT count(*), 'records inserted in value_analysis table' from mysql_portfolio.value_analysis;
+SELECT count(*), 'records inserted in value_analysis table' from mysql_portfolio.value_analysis;
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('value_analysis_info',exchangeName,now());
    END ;
 

@@ -98,6 +98,7 @@ INSERT INTO mysql_portfolio.growth_analysis
    AND YEAR(wacc_data.date) = stock_param.calendarYear
    ;
    SELECT count(*), 'records inserted in growth_analysis table' FROM mysql_portfolio.growth_analysis;
+   INSERT INTO mysql_portfolio.proc_exec_history VALUES ('growth_analysis_info',exchangeName,now());
    END ;
 
 

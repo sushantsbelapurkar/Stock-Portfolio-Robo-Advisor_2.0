@@ -9,7 +9,9 @@ BEGIN
 INSERT INTO mysql_portfolio.vw_stock_parameter_check
 WITH key_metrics_rownum as
  (
-  SELECT key_metrics.*,year(key_metrics.date) as calendarYear, row_number() over (partition by key_metrics.symbol order by year(key_metrics.date)) as row_numb
+  SELECT key_metrics.*,
+--  year(key_metrics.date) as calendarYear,
+  row_number() over (partition by key_metrics.symbol order by year(key_metrics.date)) as row_numb
   FROM mysql_portfolio.key_metrics
   INNER JOIN mysql_portfolio.symbol_list
  on symbol_list.symbol = key_metrics.symbol
@@ -74,5 +76,6 @@ SELECT DISTINCT
   --   AND screener.symbol in ('AAPL','MSFT')
     ;
     SELECT count(*), 'records inserted in vw_stock_parameter_check table' from mysql_portfolio.vw_stock_parameter_check;
+    INSERT INTO mysql_portfolio.proc_exec_history VALUES ('decision_view_info',exchangeName,now());
     END  ;
 

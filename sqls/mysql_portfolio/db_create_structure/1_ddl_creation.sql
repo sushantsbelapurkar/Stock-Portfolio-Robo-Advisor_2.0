@@ -7,8 +7,8 @@ CREATE TABLE `_200_day_avg_price_info` (
   `_200day_avg_price` double DEFAULT NULL,
   `days_considered` bigint unsigned DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE (symbol(255), latest_close_price, latest_price_date(255))
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE (symbol(255), latest_close_price, latest_price_date(255))
 );
 
 DROP TABLE IF EXISTS _50_day_avg_price_info;
@@ -19,8 +19,8 @@ CREATE TABLE `_50_day_avg_price_info` (
   `_50day_avg_price` double DEFAULT NULL,
   `days_considered` bigint unsigned DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE (symbol(255), latest_close_price, latest_price_date(255))
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE (symbol(255), latest_close_price, latest_price_date(255))
 );
 
 DROP TABLE IF EXISTS _5_year_avg_price_info;
@@ -31,8 +31,8 @@ CREATE TABLE `_5_year_avg_price_info` (
   `_5yr_avg_price` double DEFAULT NULL,
   `days_considered` bigint unsigned DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE (symbol(255), latest_close_price, latest_price_date(255))
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE (symbol(255), latest_close_price, latest_price_date(255))
 );
 
 DROP TABLE IF EXISTS avg_std_dev;
@@ -42,8 +42,8 @@ CREATE TABLE `avg_std_dev` (
   `avg_return` double DEFAULT NULL,
   `volatility` double DEFAULT NULL,
   `count_of_years_considered` bigint DEFAULT '0',
-  INDEX idx_symbol (symbol),
-  UNIQUE(symbol,latest_price_date,avg_return)
+  INDEX idx_symbol (symbol)
+  -- UNIQUE(symbol,latest_price_date,avg_return)
 );
 
 DROP TABLE IF EXISTS company_analysis;
@@ -73,8 +73,8 @@ CREATE TABLE `company_analysis` (
   `capex_growth_ofc` varchar(9) CHARACTER SET latin1 DEFAULT NULL,
   `capex_growth_revenue` varchar(9) CHARACTER SET latin1 DEFAULT NULL,
   `is_roic_greater_wacc` varchar(1) CHARACTER SET latin1 DEFAULT NULL,
-   INDEX idx_symbol (symbol(255)),
-   UNIQUE(symbol(255),calendarYear,eps_growth_analysis,pb_ratio_analysis)
+   INDEX idx_symbol (symbol(255))
+   -- UNIQUE(symbol(255),calendarYear,eps_growth_analysis,pb_ratio_analysis)
 );
 
 DROP TABLE IF EXISTS cost_of_debt;
@@ -84,8 +84,8 @@ CREATE TABLE `cost_of_debt` (
   `ebit` bigint DEFAULT NULL,
   `effective_tax_rate` decimal(23,4) DEFAULT NULL,
   `after_tax_cost_of_debt` decimal(45,2) DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-   UNIQUE(symbol(255),date,ebit)
+  INDEX idx_symbol (symbol(255))
+   -- UNIQUE(symbol(255),date,ebit)
 );
 
 DROP TABLE IF EXISTS cost_of_equity;
@@ -96,8 +96,8 @@ CREATE TABLE `cost_of_equity` (
   `equity_risk_premium` double DEFAULT NULL,
   `beta` double DEFAULT NULL,
   `cost_of_equity` double DEFAULT NULL,
-  INDEX idx_symbol (symbol),
-   UNIQUE(symbol,expected_rate_of_return,risk_free_rate)
+  INDEX idx_symbol (symbol)
+   -- UNIQUE(symbol,expected_rate_of_return,risk_free_rate)
 );
 
 DROP TABLE IF EXISTS dcf_data;
@@ -123,8 +123,8 @@ CREATE TABLE `dcf_data` (
   `todays_value` double DEFAULT NULL,
   `outstandingShares` bigint DEFAULT NULL,
   `dcf_fair_value` double DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-   UNIQUE(symbol(255),exchangeShortName(255),calendarYear,current_fcf)
+  INDEX idx_symbol (symbol(255))
+   -- UNIQUE(symbol(255),exchangeShortName(255),calendarYear,current_fcf)
 );
 
 DROP TABLE IF EXISTS debt_to_equity_ratio;
@@ -134,8 +134,8 @@ CREATE TABLE `debt_to_equity_ratio` (
   `debt_to_capitalization` decimal(24,4) DEFAULT NULL,
   `equity_to_capitalization` decimal(24,4) DEFAULT NULL,
   `debt_to_equity_ratio` decimal(27,2) DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-   UNIQUE(symbol(255),date,debt_to_capitalization)
+  INDEX idx_symbol (symbol(255))
+   -- UNIQUE(symbol(255),date,debt_to_capitalization)
 );
 
 DROP TABLE IF EXISTS ebitda_info;
@@ -148,8 +148,8 @@ CREATE TABLE `ebitda_info` (
   `number_of_yrs` bigint DEFAULT '0',
   `ebitda_cagr` double DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-   UNIQUE(symbol(255),calendarYear,recent_ebitda)
+  INDEX idx_symbol (symbol(255))
+   -- UNIQUE(symbol(255),calendarYear,recent_ebitda)
 );
 
 DROP TABLE IF EXISTS eps_info;
@@ -161,8 +161,8 @@ CREATE TABLE `eps_info` (
   `positive_eps_growth_3yrs` int NOT NULL DEFAULT '0',
   `_5yr_avg_eps` double DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),calendarYear,ttm_eps)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),calendarYear,ttm_eps)
 );
 
 DROP TABLE IF EXISTS expected_return;
@@ -175,8 +175,8 @@ CREATE TABLE `expected_return` (
   `probability_positive` decimal(2,1) DEFAULT NULL,
   `probability_negative` decimal(2,1) DEFAULT NULL,
   `expected_rate_of_return` double DEFAULT NULL,
-  INDEX idx_symbol (symbol),
-  UNIQUE(symbol,latest_price_date,true_avg_return)
+  INDEX idx_symbol (symbol)
+  -- UNIQUE(symbol,latest_price_date,true_avg_return)
 );
 
 DROP TABLE IF EXISTS free_cash_flow_info;
@@ -189,8 +189,8 @@ CREATE TABLE `free_cash_flow_info` (
   `number_of_yrs` bigint DEFAULT '0',
   `fcf_cagr` double DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),calendarYear,recent_free_cash_flow)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),calendarYear,recent_free_cash_flow)
 );
 
 DROP TABLE IF EXISTS fundamental_analysis;
@@ -213,8 +213,8 @@ CREATE TABLE `fundamental_analysis` (
   `roe_analysis` varchar(7) CHARACTER SET latin1 DEFAULT NULL,
   `roic_analysis` varchar(7) CHARACTER SET latin1 DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),calendarYear,debtToEquity)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),calendarYear,debtToEquity)
 );
 
 DROP TABLE IF EXISTS gdp_data;
@@ -222,8 +222,8 @@ CREATE TABLE `gdp_data` (
   `country` varchar(20) DEFAULT NULL,
   `year` int DEFAULT NULL,
   `gdp` float(4,2) DEFAULT NULL,
-  INDEX idx_country (country),
-  UNIQUE(country,year,gdp)
+  INDEX idx_country (country)
+  -- UNIQUE(country,year,gdp)
 );
 
 DROP TABLE IF EXISTS golden_death_cross;
@@ -241,8 +241,8 @@ CREATE TABLE `golden_death_cross` (
   `percent_diff_in_50_200_price` double DEFAULT NULL,
   `note` varchar(20) CHARACTER SET latin1 NOT NULL DEFAULT '',
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),latest_price_date(255),_50day_avg_price)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),latest_price_date(255),_50day_avg_price)
 );
 
 DROP TABLE IF EXISTS growth_analysis;
@@ -276,8 +276,8 @@ CREATE TABLE `growth_analysis` (
   `capex_growth_revenue` varchar(9) CHARACTER SET latin1 DEFAULT NULL,
   `is_roic_greater_wacc` varchar(1) CHARACTER SET latin1 DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),latest_price_date(255),roic,wacc)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),latest_price_date(255),roic,wacc)
 );
 
 DROP TABLE IF EXISTS netincome_info;
@@ -290,8 +290,8 @@ CREATE TABLE `netincome_info` (
   `number_of_yrs` bigint DEFAULT '0',
   `netincome_cagr` double DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),calendarYear,recent_netincome,avg_netincome)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),calendarYear,recent_netincome,avg_netincome)
 );
 
 DROP TABLE IF EXISTS pe_pb_ratio_info;
@@ -315,8 +315,8 @@ CREATE TABLE `pe_pb_ratio_info` (
   `bookValuePerShare` double DEFAULT NULL,
   `pbratio` double DEFAULT NULL,
   `ratio_pe_into_pb` double DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),calendarYear,ttm_eps)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),calendarYear,ttm_eps)
 );
 
 DROP TABLE IF EXISTS price_cashflow_info;
@@ -333,8 +333,8 @@ CREATE TABLE `price_cashflow_info` (
   `price_fcf_ratio` double DEFAULT NULL,
   `price_ocf_ratio` double DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),latest_cash_flow_date,calendarYear,freeCashFlow)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),latest_cash_flow_date,calendarYear,freeCashFlow)
 );
 
 DROP TABLE IF EXISTS proc_exec_history;
@@ -358,8 +358,8 @@ CREATE TABLE `progressive_free_cashflow` (
   `yr5_prog_fcf` double DEFAULT NULL,
   `wacc` double DEFAULT NULL,
   `terminal_value` double DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),exchangeShortName(255),calendarYear,current_fcf)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),exchangeShortName(255),calendarYear,current_fcf)
 );
 
 DROP TABLE IF EXISTS rate_of_return_info;
@@ -368,8 +368,8 @@ CREATE TABLE `rate_of_return_info` (
   `year` varchar(20) DEFAULT NULL,
   `latest_date` date DEFAULT NULL,
   `rate_of_return` float DEFAULT NULL,
-  INDEX idx_symbol (symbol),
-  UNIQUE(symbol,year,rate_of_return)
+  INDEX idx_symbol (symbol)
+  -- UNIQUE(symbol,year,rate_of_return)
 );
 
 DROP TABLE IF EXISTS risk_free_rate;
@@ -377,8 +377,8 @@ CREATE TABLE `risk_free_rate` (
   `latest_date` date DEFAULT NULL,
   `t_bill_rate` float(4,2) DEFAULT NULL,
   `exchange_name` varchar(255) DEFAULT NULL,
-  INDEX idx_symbol (exchange_name),
-  UNIQUE(exchange_name,latest_date,t_bill_rate)
+  INDEX idx_symbol (exchange_name)
+  -- UNIQUE(exchange_name,latest_date,t_bill_rate)
 );
 
 DROP TABLE IF EXISTS sales_info;
@@ -391,8 +391,8 @@ CREATE TABLE `sales_info` (
   `number_of_yrs` bigint DEFAULT '0',
   `revenue_cagr` double DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),calendarYear,avg_revenue)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),calendarYear,avg_revenue)
 );
 
 DROP TABLE IF EXISTS value_analysis;
@@ -418,8 +418,8 @@ CREATE TABLE `value_analysis` (
   `price_to_sales_analysis` varchar(7) CHARACTER SET latin1 DEFAULT NULL,
   `price_ocf_analysis` varchar(12) CHARACTER SET latin1 DEFAULT NULL,
   `created_at` date NOT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),latest_price_date(255),latest_close_price)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),latest_price_date(255),latest_close_price)
 );
 
 DROP TABLE IF EXISTS vw_stock_parameter_check;
@@ -479,8 +479,8 @@ CREATE TABLE `vw_stock_parameter_check` (
   `live_pbratio` double DEFAULT NULL,
   `grahamNetNet` double DEFAULT NULL,
   `grahamNumber` double DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),exchangeShortName(255),pbratio)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),exchangeShortName(255),pbratio)
 );
 
 DROP TABLE IF EXISTS wacc_data;
@@ -492,8 +492,8 @@ CREATE TABLE `wacc_data` (
   `cost_of_equity` double DEFAULT NULL,
   `after_tax_cost_of_debt` decimal(45,2) DEFAULT NULL,
   `wacc` double DEFAULT NULL,
-  INDEX idx_symbol (symbol(255)),
-  UNIQUE(symbol(255),date,debt_to_capitalization)
+  INDEX idx_symbol (symbol(255))
+  -- UNIQUE(symbol(255),date,debt_to_capitalization)
 );
 
 

@@ -31,7 +31,14 @@ TRUNCATE TABLE mysql_portfolio.dcf_data;
 TRUNCATE TABLE mysql_portfolio.company_analysis;
 TRUNCATE TABLE mysql_portfolio.company_score;
 
+INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',5.3,'NYSE');
+INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',5.3,'NASDAQ');
+INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',7.4,'NSE');
+INSERT INTO mysql_portfolio.risk_free_rate (latest_date, t_bill_rate,exchange_name)values ('2022-12-31',7.4,'BSE');
 
+INSERT INTO mysql_portfolio.gdp_data VALUES ('USA', 2023, 1.5);
+INSERT INTO mysql_portfolio.gdp_data VALUES ('India', 2021, 5.5);
 
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('all base tables truncated','all exchanges',now());
 SELECT 'sp_drop_master_tables_cleanup_completed';
 END;

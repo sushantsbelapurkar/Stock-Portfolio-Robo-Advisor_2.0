@@ -397,7 +397,7 @@ THEN
  ON yrs.symbol = free_cashflow_details.symbol
  WHERE free_cashflow_details.row_numb = max_row.max_row_numb order by 1,2
  ;
-
  SELECT count(*),'records inserted in free_cash_flow_info table' FROM mysql_portfolio.free_cash_flow_info;
+ INSERT INTO mysql_portfolio.proc_exec_history VALUES ('cagr_info',exchangeName,now());
 END ;
 

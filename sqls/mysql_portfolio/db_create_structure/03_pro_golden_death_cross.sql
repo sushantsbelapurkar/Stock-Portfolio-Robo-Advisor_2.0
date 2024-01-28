@@ -117,5 +117,6 @@ WHERE _200day_avg_price !=0 AND _200day_avg_price IS NOT NULL
 ;
 -- SELECT * FROM mysql_portfolio.golden_death_cross;
 SELECT count(*), 'records inserted in golden_death_cross table' from mysql_portfolio.golden_death_cross;
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('golden_death_cross_info',exchangeName,now());
 END  ;
 

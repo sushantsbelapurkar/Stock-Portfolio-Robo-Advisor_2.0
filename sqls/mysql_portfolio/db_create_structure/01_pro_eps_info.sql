@@ -40,5 +40,5 @@ THEN 1 ELSE 0 END AS positive_eps_growth_3yrs FROM eps_growth
  WHERE eps_details.row_numb = max_row.max_row_numb order by 1,2
  ;
  SELECT count(*),'records inserted in eps_info table' from mysql_portfolio.eps_info;
-
+ INSERT INTO mysql_portfolio.proc_exec_history VALUES ('eps_info',exchangeName,now());
  END ;

@@ -38,4 +38,5 @@ and symbol_list.exchangeShortName = exchangeName
  WHERE cash_flow.row_numb = cash_flow_statement_max.max_row_numb
  ;
  SELECT count(*), 'records inserted in price_cashflow_info table' from mysql_portfolio.price_cashflow_info;
+ INSERT INTO mysql_portfolio.proc_exec_history VALUES ('price_cah_flow_info',exchangeName,now());
  END ;

@@ -246,5 +246,6 @@ DROP TEMPORARY TABLE mysql_portfolio.total_score;
 DROP TEMPORARY TABLE mysql_portfolio.all_score;
 
 SELECT COUNT(*), 'records inserted in company_score table' FROM mysql_portfolio.company_score;
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('company_analysis_score_info',exchangeName,now());
 END  ;
 

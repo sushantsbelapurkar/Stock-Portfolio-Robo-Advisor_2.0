@@ -9,7 +9,9 @@ BEGIN
 INSERT INTO mysql_portfolio.pe_pb_ratio_info
  WITH key_metrics_rownum as
  (
-  SELECT km.*,year(km.date) as calendarYear, row_number() over (partition by km.symbol order by year(km.date)) as row_numb
+  SELECT km.*,
+  -- year(km.date) as calendarYear,
+  row_number() over (partition by km.symbol order by year(km.date)) as row_numb
   FROM mysql_portfolio.key_metrics km
   INNER JOIN mysql_portfolio.symbol_list
  on symbol_list.symbol = km.symbol
@@ -51,4 +53,5 @@ and symbol_list.exchangeShortName = exchangeName
  ON eps.symbol = key_metrics_maxyr.symbol;
 
 SELECT count(*), 'records inserted in pe_pb_ratio_info table' from mysql_portfolio.pe_pb_ratio_info;
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('pepb_info',exchangeName,now());
  END ;

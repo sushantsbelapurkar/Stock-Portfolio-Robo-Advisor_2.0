@@ -54,4 +54,5 @@ INNER JOIN mysql_portfolio.symbol_list
 and symbol_list.exchangeShortName = exchangeName;
 
 SELECT count(*), 'records inserted in fundamental_analysis table' from mysql_portfolio.fundamental_analysis;
+INSERT INTO mysql_portfolio.proc_exec_history VALUES ('fundamental_analysis_info',exchangeName,now());
 END  ;
