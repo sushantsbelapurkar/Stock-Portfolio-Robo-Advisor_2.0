@@ -65,10 +65,10 @@ on stock_view.symbol = portfolio.symbol
 where portfolio.latest_price != 0
 order by growth_score desc
 ;
-
+select * from mysql_portfolio.stock_screener limit 10;
 -- Overall VALUE analysis, score and api rating
 select
-analysis.symbol,
+analysis.symbol, stock_screener.price,
 stock_view.company_cap,stock_view.industry,stock_view.sector,stock_view.beta, stock_view._5yr_avg_eps,
 stock_view.freeCashFlow, (15*stock_view._5yr_avg_eps) as fair_value,
 stock_view.grahamNumber, (((15*stock_view._5yr_avg_eps) + stock_view.grahamNumber)/2) avg_fair_price,
@@ -90,15 +90,17 @@ left join mysql_portfolio.api_rating
 on api_rating.symbol = analysis.symbol
 left join mysql_portfolio.vw_stock_parameter_check stock_view
 on stock_view.symbol = analysis.symbol
+left join mysql_portfolio.stock_screener
+on stock_screener.symbol = analysis.symbol
 WHERE
--- analysis.symbol like '%BRK%'
-fundamental_score >= 53
+analysis.symbol like '%TDUP%'
+-- fundamental_score >= 53
 and analysis.symbol not in (select distinct symbol from mysql_portfolio.portfolio_stocks where latest_price !=0)
 order by fundamental_score desc
 ;
 -- Overall GROWTH analysis, score and api rating
 select
-analysis.symbol,
+analysis.symbol, stock_screener.price,
 stock_view.company_cap,stock_view.industry,stock_view.sector,stock_view.beta, stock_view._5yr_avg_eps,
 stock_view.freeCashFlow, (15*stock_view._5yr_avg_eps) as fair_value,
 stock_view.grahamNumber, (((15*stock_view._5yr_avg_eps) + stock_view.grahamNumber)/2) avg_fair_price,
@@ -118,6 +120,8 @@ left join mysql_portfolio.api_rating
 on api_rating.symbol = analysis.symbol
 left join mysql_portfolio.vw_stock_parameter_check stock_view
 on stock_view.symbol = analysis.symbol
+left join mysql_portfolio.stock_screener
+on stock_screener.symbol = analysis.symbol
 WHERE growth_score >= 47
 and analysis.symbol not in (select distinct symbol from mysql_portfolio.portfolio_stocks where latest_price !=0)
 order by growth_score desc
