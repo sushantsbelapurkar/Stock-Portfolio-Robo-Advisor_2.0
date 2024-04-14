@@ -68,7 +68,7 @@ task_pro_price_to_cashflow_analysis = MySqlOperator(
 task_pro_decision_view = MySqlOperator(
     task_id="pro_decision_view",
     dag=dag,
-    sql="mysql_portfolio/db_create_structure/06_pro_decision_view.sql",
+    sql="mysql_portfolio/db_create_structure/03_06_pro_decision_view.sql",
     mysql_conn_id='mysql_localhost'
 )
 
@@ -96,7 +96,7 @@ task_pro_growth_analysis = MySqlOperator(
 task_pro_capm_wacc_calc = MySqlOperator(
     task_id="pro_capm_wacc_calc",
     dag=dag,
-    sql="mysql_portfolio/db_create_structure/10_pro_capm_wacc_calc.sql",
+    sql="mysql_portfolio/db_create_structure/03_10_pro_capm_wacc_calc.sql",
     mysql_conn_id='mysql_localhost'
 
 )

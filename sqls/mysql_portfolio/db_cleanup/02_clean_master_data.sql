@@ -1,7 +1,7 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.clean_master_data;
 CREATE PROCEDURE mysql_portfolio.clean_master_data()
 BEGIN
--- -------------------- CALCULATION TABLES ----------------------------------
+-- -------------------- CALCULATION/FACT TABLES ----------------------------------
 TRUNCATE TABLE mysql_portfolio.eps_info;
 TRUNCATE TABLE mysql_portfolio.ebitda_info;
 TRUNCATE TABLE mysql_portfolio.netincome_info;
