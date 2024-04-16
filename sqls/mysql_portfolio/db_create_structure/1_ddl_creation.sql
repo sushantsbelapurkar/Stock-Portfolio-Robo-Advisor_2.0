@@ -1,4 +1,5 @@
 USE mysql_portfolio;
+
 DROP TABLE IF EXISTS _200_day_avg_price_info;
 CREATE TABLE `_200_day_avg_price_info` (
   `symbol` text,

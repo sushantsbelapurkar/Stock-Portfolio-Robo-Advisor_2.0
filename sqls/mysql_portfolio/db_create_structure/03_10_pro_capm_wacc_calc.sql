@@ -1,3 +1,4 @@
+
 DROP PROCEDURE IF EXISTS mysql_portfolio.capm_wacc_tmp;
 
  CREATE PROCEDURE mysql_portfolio.capm_wacc_tmp(
