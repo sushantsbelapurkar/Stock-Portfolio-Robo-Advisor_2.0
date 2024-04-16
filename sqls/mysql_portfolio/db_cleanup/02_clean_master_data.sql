@@ -1,4 +1,5 @@
 DROP PROCEDURE IF EXISTS mysql_portfolio.clean_master_data;
+
 CREATE PROCEDURE mysql_portfolio.clean_master_data()
 BEGIN
 -- -------------------- CALCULATION/FACT TABLES ----------------------------------

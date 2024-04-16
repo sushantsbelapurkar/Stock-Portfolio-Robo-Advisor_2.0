@@ -1,3 +1,4 @@
+
 -- --------------------------------- ebitda CAGR -----------------------------
 DROP PROCEDURE IF EXISTS mysql_portfolio.cagr_info;
 
