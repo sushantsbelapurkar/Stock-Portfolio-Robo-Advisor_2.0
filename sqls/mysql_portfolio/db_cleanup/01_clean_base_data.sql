@@ -1,5 +1,4 @@
 DELIMITER //
-
 CREATE OR REPLACE PROCEDURE mysql_portfolio.drop_base_data()
 BEGIN
 -- ----------------------- CLEAN API DATA TABLES --------------------------
