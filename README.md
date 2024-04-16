@@ -1,7 +1,7 @@
 # Stock-Portfolio-Robo-Advisor-Pro
 This project is an advanced version of the initial [Stock-Portfolio-Robo-Advisor](https://github.com/sushantsbelapurkar/Stock-Portfolio-Robo-Advisor) project, focusing on in-depth analysis of 30 years of stock data to design portfolios based on three different strategies: Fundamental Analysis, Value Analysis, and Growth Analysis.
 
-The project utilizes advanced Data Modeling and data warehousing concepts to store and analyze the data. After fetching the results of each company for the last five years and historical prices for 30 years from an API, a robust data warehouse is constructed to analyze the data from various perspectives using different algorithmic logics. The entire analysis and logic are implemented using advanced SQL and Python.
+The project utilizes advanced Data Modeling and data warehousing concepts to store and analyze the data. After fetching the results of each company for the last five years and historical prices for 30 years from an API, a robust data warehouse is constructed to analyze the data from various perspectives using different algorithmic logics. The entire analysis and algorithm logic are implemented using advanced SQL and Python.
 
 Furthermore, the portfolio is now managed automatically using Airflow DAG, where procedures are executed sequentially to run the entire analysis.
 
