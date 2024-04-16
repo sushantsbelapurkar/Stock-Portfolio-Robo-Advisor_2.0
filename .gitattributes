@@ -1,6 +1,6 @@
 *.py linguist-language=Python
 *.ipynb linguist-language=Jupyter Notebook
-/sqls/*.sql linguist-language=SQL
+/sqls/** linguist-language=SQL
 /dags/** linguist-language=Python
 *.cfg linguist-language=text
 
