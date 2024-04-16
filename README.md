@@ -4,4 +4,4 @@ The project utilizes advanced Data Modeling and data warehousing concepts to sto
 
 Furthermore, the portfolio is now managed automatically using Airflow DAG, where stopred procedures are executed sequentially to run the entire analysis.
 
-Please note that the code provided is a snippet of the actual code, designed to protect sensitive information and the logic behind the operations. However, it showcases the overall building blocks of the entire project.
+Please note that the code provided is a snippet of the actual code, designed to protect sensitive information and the logic behind the operations as website is under progress. However, it showcases the overall building blocks of the entire project.
