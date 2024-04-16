@@ -3,3 +3,5 @@
 *.ipynb linguist-language=Jupyter Notebook
 /sqls/* linguist-language=SQL
 /dags/* linguist-language=Python
+*.cfg linguist-language=text
+
