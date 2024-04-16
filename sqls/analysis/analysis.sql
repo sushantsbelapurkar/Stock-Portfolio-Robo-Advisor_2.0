@@ -1,7 +1,6 @@
-select * from mysql_portfolio.symbol_list where name like '%ORIENTAL%' limit 10;
-SELECT * FROM mysql_portfolio.vw_stock_parameter_check limit 10;
 -- FUNDAMENTAL TOTAL Range	71 -->	53 -->	22
 -- GROWTH TOTAL	Range       68 -->	47 -->	28
+
 select * from mysql_portfolio.company_score
 where fundamental_score >= 53 and growth_score >= 47;
 
