@@ -1,4 +1,3 @@
-
 DROP PROCEDURE IF EXISTS mysql_portfolio.decision_view_info;
 
 CREATE PROCEDURE mysql_portfolio.decision_view_info(
