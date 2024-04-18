@@ -14,7 +14,7 @@ INSERT INTO mysql_portfolio.ebitda_info
  -- CASE WHEN ebitda > 0 THEN ebitda ELSE 0.1 END AS ebitda, 
  lag(inc.ebitda) over (partition by inc.symbol order by inc.calendarYear) as prev_ebitda, 
 CASE 
-	WHEN inc.ebitda > lag(inc.ebitda) over (partition by inc.symbol order by inc.calendarYear) THEN 'Y' ELSE 'N' END AS ebitda_growth,
+WHEN inc.ebitda > lag(inc.ebitda) over (partition by inc.symbol order by inc.calendarYear) THEN 'Y' ELSE 'N' END AS ebitda_growth,
 round(avg(inc.ebitda) 
 over(
 	partition by inc.symbol order by inc.calendarYear rows between unbounded preceding and unbounded following),2
