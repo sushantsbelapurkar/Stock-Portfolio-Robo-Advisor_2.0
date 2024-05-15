@@ -5,7 +5,7 @@ Furthermore, the portfolio is now managed automatically using Airflow DAG, where
 
 Please note that the provided code is a snippet intended to protect sensitive information and proprietary logic, as the website is still in progress. However, it demonstrates the foundational components of the overall backend.
 
-Below images shows the feature importance and PCA analysis derived from machine learning models:
+Below images shows the feature importance and model accuracy derived from machine learning models:
 
 ![Feature_importance](https://github.com/sushantsbelapurkar/Stock-Portfolio-Robo-Advisor_2.0/assets/59714916/1f3989c2-7236-4e10-9d12-22cd1ff465b8)
 ![DNN_Post_PCA](https://github.com/sushantsbelapurkar/Stock-Portfolio-Robo-Advisor_2.0/assets/59714916/43a33cc5-cc7c-4a62-8a5d-e3fc3e1741cf)
