@@ -4,6 +4,8 @@ The project employs advanced Data Modeling and data warehousing concepts for dat
 
 Furthermore, the portfolio is now managed automatically using Airflow DAG, where stopred procedures are executed sequentially to run the entire analysis.
 
+Over the last 5 years, this portfolio delivered annual returns consistently surpassing the S&P 500 index.
+
 Please note that the provided code is a snippet intended to protect sensitive information and proprietary logic, as the website is still in progress. However, it demonstrates the foundational components of the overall backend.
 
 Below images shows the feature importance and model accuracy derived from machine learning models:
